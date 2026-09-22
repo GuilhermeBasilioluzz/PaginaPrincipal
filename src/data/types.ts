@@ -20,7 +20,6 @@ export interface Section {
 export interface Category {
   id: string
   name: string
-  icon: string
   description: string
   /** Papel que a IA deve assumir no prompt gerado. */
   role: string

@@ -12,7 +12,8 @@ export default function CategorySelect({ selectedId, onSelect, onBack }: Props) 
       <button className="link" onClick={onBack}>
         ← Voltar
       </button>
-      <h2>Que tipo de sistema você quer criar?</h2>
+      <p className="eyebrow">Passo 1 de 3</p>
+      <h2 className="screen-title">Que tipo de sistema você quer criar?</h2>
       <p className="muted">Cada categoria tem um questionário próprio.</p>
       <div className="category-grid">
         {categories.map((c) => (
@@ -21,11 +22,11 @@ export default function CategorySelect({ selectedId, onSelect, onBack }: Props) 
             className={`card category${c.id === selectedId ? ' selected' : ''}`}
             onClick={() => onSelect(c.id)}
           >
-            <span className="category-icon" aria-hidden>
-              {c.icon}
-            </span>
             <strong>{c.name}</strong>
             <span className="muted">{c.description}</span>
+            <span className="category-go" aria-hidden>
+              Começar →
+            </span>
           </button>
         ))}
       </div>

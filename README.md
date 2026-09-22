@@ -15,6 +15,16 @@ npm test         # roda os testes
 npm run build    # gera a versão de produção em dist/
 ```
 
+## Planos, login e pagamento
+
+- Preços e links de checkout da Cakto: `src/config/plans.ts`.
+- Login sem senha (Supabase) e liberação automática após o pagamento (webhook da Cakto).
+- Prospecção de comércios com Google Maps: escolha o nicho e o local, veja nota, avaliações, telefone e site.
+- Funil de contatos: salve comércios, mude a etapa, anote e marque o próximo contato.
+- Mensagens de abordagem prontas (primeiro contato, retomar conversa, proposta), personalizadas
+  pela nota, avaliações e presença de site do comércio, com envio direto pelo WhatsApp.
+- **Passo a passo para configurar e publicar: [docs/CONFIGURACAO.md](docs/CONFIGURACAO.md).**
+
 ## Estrutura
 
 ```
@@ -22,9 +32,20 @@ src/
   data/categories.ts      # categorias e questionários (edite aqui para adicionar perguntas)
   data/types.ts           # tipos de pergunta, seção e categoria
   lib/generatePrompt.ts   # monta o prompt a partir das respostas
-  screens/                # Home, CategorySelect, Questionnaire, Result
+  config/plans.ts         # preços dos planos e links de checkout da Cakto
+  screens/                # Landing (vendas), Prospect (mapa), CategorySelect, Questionnaire, Result
+  data/niches.ts          # tipos de comércio para prospectar e o projeto sugerido para cada um
+  lib/leads.ts            # ordenação/filtros da lista e preenchimento do projeto a partir do comércio
   components/             # QuestionField (texto, texto longo, escolha única, múltipla)
+  auth/useAccess.ts       # sessão do usuário e verificação do acesso pago
+  lib/access.ts           # regra de quando o acesso está válido
   App.tsx                 # controla a navegação entre as telas
+api/cakto-webhook.ts      # recebe os avisos de pagamento da Cakto (roda na Vercel)
+api/places-search.ts      # busca comércios no Google (só para quem tem acesso)
+api/places-details.ts     # dados atualizados dos comércios salvos no funil
+src/lib/crm.ts            # etapas do funil e gravação no Supabase (tabela saved_leads)
+server/cakto.ts           # decide liberar, manter ou remover o acesso
+supabase/schema.sql       # tabelas e regras de segurança do banco
 ```
 
 ### Adicionando uma pergunta
