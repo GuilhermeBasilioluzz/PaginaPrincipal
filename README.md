@@ -19,7 +19,8 @@ npm run build    # gera a versão de produção em dist/
 
 - Preços e links de checkout da Cakto: `src/config/plans.ts`.
 - Login sem senha (Supabase) e liberação automática após o pagamento (webhook da Cakto).
-- Prospecção de comércios com Google Maps: escolha o nicho e o local, veja nota, avaliações, telefone e site.
+- Prospecção de comércios no mapa: escolha o nicho e o local e veja os negócios da região.
+  Grátis com OpenStreetMap (padrão) ou, com as chaves do Google, com nota e avaliações do Google Maps.
 - Funil de contatos: salve comércios, mude a etapa, anote e marque o próximo contato.
 - Mensagens de abordagem prontas (primeiro contato, retomar conversa, proposta), personalizadas
   pela nota, avaliações e presença de site do comércio, com envio direto pelo WhatsApp.

@@ -5,7 +5,7 @@ import { whatsappUrl } from './leads'
 function row(partial: Partial<SavedLead>): SavedLead {
   return {
     id: 'x', place_id: 'p', niche_id: 'barbearia', niche_label: 'Barbearia', status: 'to_contact', notes: '',
-    contact_name: '', next_action_at: null, created_at: '2026-09-01T00:00:00Z', updated_at: '2026-09-01T00:00:00Z', ...partial,
+    contact_name: '', next_action_at: null, place_snapshot: null, created_at: '2026-09-01T00:00:00Z', updated_at: '2026-09-01T00:00:00Z', ...partial,
   }
 }
 
@@ -36,5 +36,14 @@ describe('whatsappUrl', () => {
     expect(whatsappUrl('+55 21 99876-5432')).toBe('https://wa.me/5521998765432')
     expect(whatsappUrl('(11) 3456-7890')).toBeNull()
     expect(whatsappUrl(null)).toBeNull()
+  })
+})
+
+describe('canStore', () => {
+  it('só guarda dados do OpenStreetMap, nunca do Google', async () => {
+    const { canStore } = await import('./crm')
+    const base = { id: 'x', name: 'n', address: '', lat: 0, lng: 0, rating: null, reviews: 0, phone: null, website: null, mapsUrl: null, operational: true }
+    expect(canStore({ ...base, source: 'osm' })).toBe(true)
+    expect(canStore({ ...base, source: 'google' })).toBe(false)
   })
 })

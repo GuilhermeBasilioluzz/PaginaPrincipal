@@ -22,8 +22,29 @@ export function loadMaps(): Promise<void> {
   return loading
 }
 
-/** Encontra uma cidade, bairro ou endereço no Brasil. */
-export async function geocode(address: string): Promise<{ lat: number; lng: number; label: string } | null> {
+export interface GeocodeResult {
+  lat: number
+  lng: number
+  label: string
+}
+
+/**
+ * Encontra uma cidade, bairro ou endereço no Brasil.
+ * Usa o Google quando configurado; senão, o Nominatim (gratuito, do OpenStreetMap).
+ */
+export async function geocode(address: string): Promise<GeocodeResult | null> {
+  return apiKey ? geocodeGoogle(address) : geocodeNominatim(address)
+}
+
+async function geocodeNominatim(address: string): Promise<GeocodeResult | null> {
+  const params = new URLSearchParams({ q: address, format: 'jsonv2', countrycodes: 'br', limit: '1', 'accept-language': 'pt-BR' })
+  const res = await fetch(`https://nominatim.openstreetmap.org/search?${params}`)
+  if (!res.ok) throw new Error('Nominatim indisponível')
+  const [first] = (await res.json()) as { lat: string; lon: string; display_name: string }[]
+  return first ? { lat: Number(first.lat), lng: Number(first.lon), label: first.display_name } : null
+}
+
+async function geocodeGoogle(address: string): Promise<GeocodeResult | null> {
   await loadMaps()
   const { results } = await new google.maps.Geocoder().geocode({ address, componentRestrictions: { country: 'BR' } })
   const first = results[0]

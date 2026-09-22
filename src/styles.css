@@ -550,3 +550,11 @@ a.tag:hover { color: var(--accent); border-color: var(--accent); }
 .outreach textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
 .outreach-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .contacts-toolbar .sender-input { flex: 0 1 240px; }
+
+/* ---------- Mapa gratuito (Leaflet) ---------- */
+.leaflet-container { font-family: var(--font); background: var(--surface); }
+.leaflet-div-icon, .leaflet-marker-icon:has(.map-pin) { background: none; border: 0; }
+.leaflet-container .map-pin { transform: translate(-50%, -50%); white-space: nowrap; display: inline-block; }
+.leaflet-container .map-pin.active { transform: translate(-50%, -50%) scale(1.2); }
+.map-pin-dot { width: 16px; height: 16px; padding: 0; }
+.leaflet-control-attribution { font-size: 10px; }

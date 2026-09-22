@@ -4,7 +4,7 @@ import { answersFromLead, distanceKm, sortLeads, type Lead } from './leads'
 
 function lead(partial: Partial<Lead>): Lead {
   return {
-    id: partial.name ?? 'x', name: 'x', address: 'Rua A, 1 - São Paulo', lat: 0, lng: 0, rating: 4, reviews: 10,
+    source: 'google', id: partial.name ?? 'x', name: 'x', address: 'Rua A, 1 - São Paulo', lat: 0, lng: 0, rating: 4, reviews: 10,
     phone: '(11) 1234-5678', website: null, mapsUrl: null, operational: true, distanceKm: 1, ...partial,
   }
 }

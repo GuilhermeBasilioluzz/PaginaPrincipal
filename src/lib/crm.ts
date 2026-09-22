@@ -28,6 +28,8 @@ export interface SavedLead {
   notes: string
   contact_name: string
   next_action_at: string | null
+  /** Dados guardados do comércio (só OpenStreetMap; o Google não permite guardar). */
+  place_snapshot: PlaceInfo | null
   created_at: string
   updated_at: string
 }
@@ -85,6 +87,11 @@ function fail(message: string): never {
   throw new Error(message)
 }
 
+/** Só dados do OpenStreetMap podem ser guardados; os do Google são buscados de novo. */
+export function canStore(place: PlaceInfo): boolean {
+  return place.source === 'osm'
+}
+
 // ---------- Operações ----------
 export async function listSaved(): Promise<SavedLead[]> {
   if (demoMode) return [...demoLoad()]
@@ -98,14 +105,17 @@ export async function createSaved(place: PlaceInfo, niche: Niche): Promise<Saved
     const now = new Date().toISOString()
     const row: SavedLead = {
       id: crypto.randomUUID(), place_id: place.id, niche_id: niche.id, niche_label: niche.label, status: 'to_contact',
-      notes: '', contact_name: '', next_action_at: null, created_at: now, updated_at: now,
+      notes: '', contact_name: '', next_action_at: null, place_snapshot: null, created_at: now, updated_at: now,
     }
     demoSave([row, ...demoLoad().filter((r) => r.place_id !== place.id)])
     demoKeepPlace(place)
     return row
   }
   const { data, error } = await db()
-    .upsert({ place_id: place.id, niche_id: niche.id, niche_label: niche.label }, { onConflict: 'user_id,place_id' })
+    .upsert(
+      { place_id: place.id, niche_id: niche.id, niche_label: niche.label, place_snapshot: canStore(place) ? place : null },
+      { onConflict: 'user_id,place_id' },
+    )
     .select()
     .single()
   if (error) fail('Não foi possível salvar este comércio.')
@@ -140,6 +150,9 @@ export async function fetchPlaces(ids: string[]): Promise<PlaceInfo[]> {
     const stored = demoPlaces()
     return ids.map((id) => stored[id]).filter(Boolean)
   }
+  // Só IDs do Google passam pelo servidor.
+  ids = ids.filter((id) => !id.startsWith('osm:'))
+  if (ids.length === 0) return []
   const { data } = (await supabase?.auth.getSession()) ?? { data: { session: null } }
   const places: PlaceInfo[] = []
   for (let i = 0; i < ids.length; i += 50) {
