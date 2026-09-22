@@ -25,7 +25,7 @@ export const lifetimePlan: Plan = {
   price: 249,
   originalPrice: 499,
   period: 'pagamento único',
-  checkoutUrl: '',
+  checkoutUrl: 'https://pay.cakto.com.br/ubgv3n5',
   cta: 'Garantir acesso vitalício',
   features: [
     'Acesso para sempre, sem mensalidade',
@@ -40,7 +40,7 @@ export const monthlyPlan: Plan = {
   name: 'Mensal',
   price: 99,
   period: 'por mês',
-  checkoutUrl: '',
+  checkoutUrl: 'https://pay.cakto.com.br/pehqx45_1129830',
   cta: 'Assinar plano mensal',
   features: [
     'Todas as categorias e questionários',

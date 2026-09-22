@@ -15,11 +15,11 @@ npm test         # roda os testes
 npm run build    # gera a versão de produção em dist/
 ```
 
-## Planos e pagamento (Cakto)
+## Planos, login e pagamento
 
-Preços e links de checkout ficam em `src/config/plans.ts`.
-Cole o link de checkout de cada produto da Cakto em `checkoutUrl`. Enquanto o link estiver vazio,
-o botão aparece como "Pagamento em breve".
+- Preços e links de checkout da Cakto: `src/config/plans.ts`.
+- Login sem senha (Supabase) e liberação automática após o pagamento (webhook da Cakto).
+- **Passo a passo para configurar e publicar: [docs/CONFIGURACAO.md](docs/CONFIGURACAO.md).**
 
 ## Estrutura
 
@@ -31,7 +31,12 @@ src/
   config/plans.ts         # preços dos planos e links de checkout da Cakto
   screens/                # Landing (página de vendas), CategorySelect, Questionnaire, Result
   components/             # QuestionField (texto, texto longo, escolha única, múltipla)
+  auth/useAccess.ts       # sessão do usuário e verificação do acesso pago
+  lib/access.ts           # regra de quando o acesso está válido
   App.tsx                 # controla a navegação entre as telas
+api/cakto-webhook.ts      # recebe os avisos de pagamento da Cakto (roda na Vercel)
+server/cakto.ts           # decide liberar, manter ou remover o acesso
+supabase/schema.sql       # tabelas e regras de segurança do banco
 ```
 
 ### Adicionando uma pergunta

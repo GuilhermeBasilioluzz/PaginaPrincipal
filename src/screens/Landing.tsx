@@ -1,5 +1,6 @@
 import { categories, getCategory, getSections } from '../data/categories'
-import { formatBRL, lifetimePlan, monthlyPlan, type Plan } from '../config/plans'
+import PlanCard from '../components/PlanCard'
+import { formatBRL, lifetimePlan, monthlyPlan } from '../config/plans'
 import { generatePrompt } from '../lib/generatePrompt'
 
 const sampleCategory = getCategory('scheduling')!
@@ -59,41 +60,6 @@ function PromptLine({ line }: { line: string }) {
   return <span>{parts.map((part, i) => (i % 2 ? <b key={i}>{part}</b> : part))}</span>
 }
 
-function PlanCard({ plan, featured }: { plan: Plan; featured?: boolean }) {
-  const discount = plan.originalPrice ? Math.round((1 - plan.price / plan.originalPrice) * 100) : 0
-  return (
-    <article className={`plan${featured ? ' plan-featured' : ''}`} aria-labelledby={`plan-${plan.id}`}>
-      <header className="plan-head">
-        <h3 id={`plan-${plan.id}`}>{plan.name}</h3>
-        {discount > 0 && <span className="plan-tag">−{discount}%</span>}
-      </header>
-      <div className="plan-price">
-        {plan.originalPrice && (
-          <span className="plan-old">
-            de <s>{formatBRL(plan.originalPrice)}</s> por
-          </span>
-        )}
-        <strong>{formatBRL(plan.price)}</strong>
-        <span className="plan-period">{plan.period}</span>
-      </div>
-      <ul className="plan-features">
-        {plan.features.map((f) => (
-          <li key={f}>{f}</li>
-        ))}
-      </ul>
-      {plan.checkoutUrl ? (
-        <a className={`btn ${featured ? 'btn-mark' : 'btn-outline'} btn-block`} href={plan.checkoutUrl}>
-          {plan.cta}
-        </a>
-      ) : (
-        <button className={`btn ${featured ? 'btn-mark' : 'btn-outline'} btn-block`} disabled>
-          Pagamento em breve
-        </button>
-      )}
-    </article>
-  )
-}
-
 export default function Landing({ onOpenGenerator }: { onOpenGenerator: () => void }) {
   const monthsToPayOff = (lifetimePlan.price / monthlyPlan.price).toLocaleString('pt-BR', { maximumFractionDigits: 1 })
   const breakEvenMonth = Math.ceil(lifetimePlan.price / monthlyPlan.price)
@@ -116,7 +82,7 @@ export default function Landing({ onOpenGenerator }: { onOpenGenerator: () => vo
                 Quero acesso por {formatBRL(lifetimePlan.price)}
               </a>
               <button className="btn btn-ghost" onClick={onOpenGenerator}>
-                Ver o gerador
+                Já comprei, entrar
               </button>
             </div>
           </div>
