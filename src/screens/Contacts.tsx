@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import OutreachPanel from '../components/OutreachPanel'
 import type { SavedLeadsApi } from '../crm/useSavedLeads'
 import { customNiche, getNiche, type Niche } from '../data/niches'
 import { isOverdue, sortSaved, statuses, type LeadStatus, type SavedLead } from '../lib/crm'
@@ -12,7 +13,20 @@ interface Props {
 
 type Filter = LeadStatus | 'all' | 'overdue'
 
-function ContactCard({ row, place, crm, onCreateProject }: { row: SavedLead; place?: PlaceInfo } & Pick<Props, 'crm' | 'onCreateProject'>) {
+const SENDER_KEY = 'outreach-sender-name'
+
+function readSender(): string {
+  try {
+    return localStorage.getItem(SENDER_KEY) ?? ''
+  } catch {
+    return ''
+  }
+}
+
+function ContactCard({
+  row, place, crm, senderName, onCreateProject,
+}: { row: SavedLead; place?: PlaceInfo; senderName: string } & Pick<Props, 'crm' | 'onCreateProject'>) {
+  const [showMessage, setShowMessage] = useState(false)
   const title = place?.name ?? (crm.unavailable.has(row.place_id) ? 'Dados indisponíveis no Google' : 'Carregando dados do Google…')
   const [notes, setNotes] = useState(row.notes)
   const [contactName, setContactName] = useState(row.contact_name)
@@ -72,11 +86,31 @@ function ContactCard({ row, place, crm, onCreateProject }: { row: SavedLead; pla
           </a>
         )}
         {place && (
+          <button
+            className={`btn btn-small ${showMessage ? 'btn-outline' : 'btn-primary'}`}
+            aria-expanded={showMessage}
+            onClick={() => setShowMessage(!showMessage)}
+          >
+            {showMessage ? 'Fechar mensagem' : 'Mensagem de abordagem'}
+          </button>
+        )}
+        {place && (
           <button className="btn btn-small btn-outline" onClick={() => onCreateProject(place, niche)}>
             Criar projeto
           </button>
         )}
       </div>
+
+      {showMessage && place && (
+        <OutreachPanel
+          place={place}
+          niche={niche}
+          status={row.status}
+          senderName={senderName}
+          contactName={row.contact_name}
+          onSent={(next) => crm.update(row.id, { status: next })}
+        />
+      )}
 
       <div className="contact-fields">
         <label className="field" htmlFor={`contact-name-${row.id}`}>
@@ -135,6 +169,16 @@ function ContactCard({ row, place, crm, onCreateProject }: { row: SavedLead; pla
 export default function Contacts({ crm, onProspect, onCreateProject }: Props) {
   const [filter, setFilter] = useState<Filter>('all')
   const [search, setSearch] = useState('')
+  const [senderName, setSenderName] = useState(readSender)
+
+  function changeSender(value: string) {
+    setSenderName(value)
+    try {
+      localStorage.setItem(SENDER_KEY, value)
+    } catch {
+      // Sem armazenamento: o nome vale só nesta visita.
+    }
+  }
 
   const counts = useMemo(() => {
     const c: Record<string, number> = { all: crm.rows.length, overdue: crm.rows.filter((r) => isOverdue(r)).length }
@@ -199,6 +243,14 @@ export default function Contacts({ crm, onProspect, onCreateProject }: Props) {
               placeholder="Buscar por nome, bairro, anotação…"
               onChange={(e) => setSearch(e.target.value)}
             />
+            <input
+              id="contacts-sender"
+              className="sender-input"
+              aria-label="Seu nome nas mensagens"
+              value={senderName}
+              placeholder="Seu nome nas mensagens"
+              onChange={(e) => changeSender(e.target.value)}
+            />
             {filter !== 'all' && (
               <button className="link" onClick={() => setFilter('all')}>
                 Mostrar todos ({counts.all})
@@ -225,7 +277,14 @@ export default function Contacts({ crm, onProspect, onCreateProject }: Props) {
       ) : (
         <ol className="contact-list">
           {visible.map((row) => (
-            <ContactCard key={row.id} row={row} place={crm.places[row.place_id]} crm={crm} onCreateProject={onCreateProject} />
+            <ContactCard
+              key={row.id}
+              row={row}
+              place={crm.places[row.place_id]}
+              crm={crm}
+              senderName={senderName}
+              onCreateProject={onCreateProject}
+            />
           ))}
         </ol>
       )}

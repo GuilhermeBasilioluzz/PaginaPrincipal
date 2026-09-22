@@ -21,6 +21,8 @@ npm run build    # gera a versão de produção em dist/
 - Login sem senha (Supabase) e liberação automática após o pagamento (webhook da Cakto).
 - Prospecção de comércios com Google Maps: escolha o nicho e o local, veja nota, avaliações, telefone e site.
 - Funil de contatos: salve comércios, mude a etapa, anote e marque o próximo contato.
+- Mensagens de abordagem prontas (primeiro contato, retomar conversa, proposta), personalizadas
+  pela nota, avaliações e presença de site do comércio, com envio direto pelo WhatsApp.
 - **Passo a passo para configurar e publicar: [docs/CONFIGURACAO.md](docs/CONFIGURACAO.md).**
 
 ## Estrutura

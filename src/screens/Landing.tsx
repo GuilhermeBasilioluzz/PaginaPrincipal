@@ -153,7 +153,10 @@ export default function Landing({ onOpenGenerator }: { onOpenGenerator: () => vo
             </li>
             <li>
               <b>Funil de contatos</b>
-              <span>Salve os comércios e acompanhe cada um: a contatar, interessado, proposta enviada, fechado.</span>
+              <span>
+                Salve os comércios, envie a mensagem de abordagem pronta pelo WhatsApp e acompanhe cada um até o
+                fechamento.
+              </span>
             </li>
             <li>
               <b>Um clique para o projeto</b>

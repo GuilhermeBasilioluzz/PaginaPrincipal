@@ -537,3 +537,16 @@ a.tag:hover { color: var(--accent); border-color: var(--accent); }
   .app-tabs { display: flex; width: 100%; }
   .app-tabs button { flex: 1; padding: 8px 6px; font-size: 0.88rem; }
 }
+
+/* ---------- Mensagem de abordagem ---------- */
+.outreach { display: flex; flex-direction: column; gap: 10px; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+.outreach-kinds { display: flex; gap: 4px; flex-wrap: wrap; }
+.outreach-kinds button { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 4px 12px; font-size: 0.85rem; font-weight: 600; color: var(--muted); }
+.outreach-kinds button.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.outreach textarea {
+  width: 100%; border: 1.5px solid var(--line); border-radius: var(--radius); padding: 10px 12px;
+  background: var(--surface); resize: vertical; font-size: 0.92rem; line-height: 1.5;
+}
+.outreach textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.outreach-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.contacts-toolbar .sender-input { flex: 0 1 240px; }
