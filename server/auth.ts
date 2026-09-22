@@ -1,10 +1,11 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { hasActiveAccess, type AccessRow } from '../src/lib/access.js'
+import { normalizeSupabaseUrl } from '../src/lib/config.js'
 
 export function serviceClient(): SupabaseClient | null {
   const { SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY } = process.env
   if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) return null
-  return createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } })
+  return createClient(normalizeSupabaseUrl(SUPABASE_URL), SUPABASE_SERVICE_ROLE_KEY.trim(), { auth: { persistSession: false } })
 }
 
 /**

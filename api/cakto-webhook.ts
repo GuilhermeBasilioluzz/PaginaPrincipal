@@ -2,6 +2,7 @@ import { timingSafeEqual } from 'node:crypto'
 import { createClient } from '@supabase/supabase-js'
 import type { AccessRow } from '../src/lib/access.js'
 import { decideAccess, parseIds, resolvePlan, type CaktoWebhook } from '../server/cakto.js'
+import { normalizeSupabaseUrl } from '../src/lib/config.js'
 
 /**
  * Recebe os avisos da Cakto (webhook) e libera ou remove o acesso ao gerador.
@@ -41,7 +42,7 @@ export async function POST(request: Request): Promise<Response> {
   const email = payload.data?.customer?.email?.trim().toLowerCase() ?? ''
   const orderId = payload.data?.refId ?? payload.data?.id ?? null
 
-  const db = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } })
+  const db = createClient(normalizeSupabaseUrl(SUPABASE_URL), SUPABASE_SERVICE_ROLE_KEY.trim(), { auth: { persistSession: false } })
   // Nunca guardamos a chave secreta no registro.
   const { secret: _secret, ...logged } = payload
   const log = (result: string) =>
