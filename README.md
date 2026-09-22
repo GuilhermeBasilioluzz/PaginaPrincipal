@@ -15,6 +15,12 @@ npm test         # roda os testes
 npm run build    # gera a versão de produção em dist/
 ```
 
+## Planos e pagamento (Cakto)
+
+Preços e links de checkout ficam em `src/config/plans.ts`.
+Cole o link de checkout de cada produto da Cakto em `checkoutUrl`. Enquanto o link estiver vazio,
+o botão aparece como "Pagamento em breve".
+
 ## Estrutura
 
 ```
@@ -22,7 +28,8 @@ src/
   data/categories.ts      # categorias e questionários (edite aqui para adicionar perguntas)
   data/types.ts           # tipos de pergunta, seção e categoria
   lib/generatePrompt.ts   # monta o prompt a partir das respostas
-  screens/                # Home, CategorySelect, Questionnaire, Result
+  config/plans.ts         # preços dos planos e links de checkout da Cakto
+  screens/                # Landing (página de vendas), CategorySelect, Questionnaire, Result
   components/             # QuestionField (texto, texto longo, escolha única, múltipla)
   App.tsx                 # controla a navegação entre as telas
 ```

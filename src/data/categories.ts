@@ -71,7 +71,6 @@ export const categories: Category[] = [
   {
     id: 'ecommerce',
     name: 'E-commerce',
-    icon: '🛒',
     description: 'Loja virtual, catálogo de produtos e vendas online.',
     role: 'engenheiro de software sênior especializado em e-commerce e conversão de vendas',
     sections: [
@@ -104,7 +103,6 @@ export const categories: Category[] = [
   {
     id: 'saas',
     name: 'SaaS / Sistema de gestão',
-    icon: '📊',
     description: 'Software por assinatura, ERP, CRM ou painel administrativo.',
     role: 'arquiteto de software sênior especializado em produtos SaaS B2B',
     sections: [
@@ -137,7 +135,6 @@ export const categories: Category[] = [
   {
     id: 'landing',
     name: 'Site institucional / Landing page',
-    icon: '🌐',
     description: 'Presença online, página de vendas ou captação de leads.',
     role: 'desenvolvedor front-end sênior e especialista em UX e copywriting para conversão',
     sections: [
@@ -168,7 +165,6 @@ export const categories: Category[] = [
   {
     id: 'mobile',
     name: 'Aplicativo mobile',
-    icon: '📱',
     description: 'App para Android e/ou iOS.',
     role: 'desenvolvedor mobile sênior especializado em apps multiplataforma',
     sections: [
@@ -199,7 +195,6 @@ export const categories: Category[] = [
   {
     id: 'education',
     name: 'Educação / Cursos online',
-    icon: '🎓',
     description: 'Plataforma de cursos, área de membros ou escola.',
     role: 'engenheiro de software sênior especializado em plataformas de ensino (EdTech)',
     sections: [
@@ -230,7 +225,6 @@ export const categories: Category[] = [
   {
     id: 'scheduling',
     name: 'Serviços e agendamentos',
-    icon: '📅',
     description: 'Clínicas, salões, consultorias e reservas.',
     role: 'engenheiro de software sênior especializado em sistemas de agendamento',
     sections: [

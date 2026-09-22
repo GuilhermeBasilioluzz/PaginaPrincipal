@@ -36,7 +36,8 @@ export default function Result({ category, answers, onEdit, onRestart }: Props) 
 
   return (
     <section>
-      <h2>Seu prompt está pronto ✨</h2>
+      <p className="eyebrow">Passo 3 de 3</p>
+      <h2 className="screen-title">Seu prompt está pronto</h2>
       <p className="muted">Copie e cole no assistente de IA de sua preferência.</p>
       <pre ref={promptRef} className="card prompt">{prompt}</pre>
       <div className="actions">

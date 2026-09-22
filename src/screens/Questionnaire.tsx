@@ -41,10 +41,9 @@ export default function Questionnaire({ category, answers, onChange, onBack, onF
 
   return (
     <section className="questionnaire">
+      <p className="eyebrow">Passo 2 de 3</p>
       <div className="q-header">
-        <span className="badge">
-          {category.icon} {category.name}
-        </span>
+        <span className="badge">{category.name}</span>
         <span className="muted small">
           Etapa {step + 1} de {sections.length}
         </span>
