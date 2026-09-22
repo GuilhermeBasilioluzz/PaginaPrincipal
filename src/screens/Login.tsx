@@ -8,12 +8,15 @@ export default function Login({ onBack }: { onBack: () => void }) {
   const [sent, setSent] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  // Detalhe técnico do Supabase (sem dados sensíveis), para facilitar o suporte.
+  const [errorDetail, setErrorDetail] = useState('')
 
   async function sendCode(e: FormEvent) {
     e.preventDefault()
     if (!supabase) return
     setBusy(true)
     setError('')
+    setErrorDetail('')
     const { error } = await supabase.auth.signInWithOtp({
       email: email.trim(),
       options: { emailRedirectTo: window.location.origin },
@@ -22,6 +25,7 @@ export default function Login({ onBack }: { onBack: () => void }) {
     if (error) {
       console.error('Falha ao enviar o e-mail de login', error)
       setError(explainSendError(error))
+      setErrorDetail([error.status, error.code, error.message].filter(Boolean).join(' · '))
     } else setSent(true)
   }
 
@@ -62,6 +66,7 @@ export default function Login({ onBack }: { onBack: () => void }) {
               />
             </div>
             {error && <p className="error">{error}</p>}
+            {errorDetail && <p className="muted small">Detalhe técnico: {errorDetail}</p>}
             <button className="btn btn-primary btn-block" disabled={busy}>
               {busy ? 'Enviando…' : 'Receber acesso por e-mail'}
             </button>
