@@ -67,6 +67,10 @@ create table if not exists public.saved_leads (
   unique (user_id, place_id)
 );
 
+-- Cópia dos dados do comércio. Só é preenchida para lugares do OpenStreetMap (dados abertos, podem
+-- ser guardados); para lugares do Google fica vazia e os dados são buscados de novo.
+alter table public.saved_leads add column if not exists place_snapshot jsonb;
+
 alter table public.saved_leads enable row level security;
 
 drop policy if exists "funil: ver os próprios" on public.saved_leads;

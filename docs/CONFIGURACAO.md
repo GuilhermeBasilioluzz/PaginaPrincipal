@@ -1,4 +1,4 @@
-# Configuração: login, pagamento, liberação de acesso e Google Maps
+# Configuração: login, pagamento, liberação de acesso e mapas
 
 Como funciona:
 
@@ -48,9 +48,9 @@ Quem tem o vitalício nunca perde o acesso por causa de um evento do plano mensa
    | `CAKTO_WEBHOOK_SECRET` | chave secreta do webhook da Cakto (passo 3) |
    | `CAKTO_LIFETIME_IDS` | `ubgv3n5` |
    | `CAKTO_MONTHLY_IDS` | `pehqx45` |
-   | `VITE_GOOGLE_MAPS_API_KEY` | chave do navegador (passo 4) |
+   | `VITE_GOOGLE_MAPS_API_KEY` | opcional: chave do navegador (passo 4) |
    | `VITE_GOOGLE_MAPS_MAP_ID` | opcional (passo 4) |
-   | `GOOGLE_PLACES_API_KEY` | chave do servidor (**secreta**, passo 4) |
+   | `GOOGLE_PLACES_API_KEY` | opcional: chave do servidor (**secreta**, passo 4) |
 
 3. Clique em **Deploy**. Anote o endereço do site.
 
@@ -65,7 +65,34 @@ Quem tem o vitalício nunca perde o acesso por causa de um evento do plano mensa
 3. Nos dois produtos, configure a **página de obrigado / redirecionamento** para `https://SEU-SITE/#entrar`,
    assim o cliente cai direto na tela de login depois de pagar.
 
-## 4. Google Maps (prospecção de comércios)
+## 4. Mapa e prospecção: grátis ou Google
+
+O sistema funciona de dois jeitos e escolhe sozinho:
+
+| | **Gratuito (padrão)** | **Google Maps** |
+|---|---|---|
+| Quando | Sem as chaves do Google | Com `VITE_GOOGLE_MAPS_API_KEY` **e** `GOOGLE_PLACES_API_KEY` |
+| Mapa | Leaflet + OpenStreetMap | Google Maps |
+| Busca de cidade | Nominatim (OpenStreetMap) | Geocoding API |
+| Comércios | Overpass (OpenStreetMap) | Places API (New) |
+| Nota e avaliações | ❌ (há um atalho "Ver avaliações no Google" em cada comércio) | ✅ |
+| Quantidade de comércios | Menor: só os cadastrados no OpenStreetMap | Maior |
+| Custo | **Zero, sem cartão** | Pago por uso, com cota gratuita mensal |
+
+**Para usar o modo gratuito, não precisa fazer nada:** basta não cadastrar as chaves do Google.
+A página de vendas também se adapta e não promete notas quando elas não existem.
+
+Cuidados do modo gratuito:
+- Os servidores públicos do OpenStreetMap (imagens do mapa, Nominatim e Overpass) são mantidos por
+  voluntários e têm **regras de uso justo**. Para um site com poucos usuários ao mesmo tempo, tudo bem.
+  Se o uso crescer, troque as imagens do mapa por um provedor com plano gratuito maior (`VITE_MAP_TILE_URL`)
+  e, se precisar, o servidor de busca (`OVERPASS_URL`).
+- O crédito "© colaboradores do OpenStreetMap" aparece no mapa e na lista, e é obrigatório.
+
+As regras do Google proíbem mostrar dados dele em outros mapas. Por isso o sistema nunca mistura
+as duas fontes: com o mapa gratuito, a busca também é gratuita.
+
+### Para ativar o Google (opcional)
 
 A prospecção usa três serviços do Google Maps Platform. Eles são **pagos por uso**, com uma cota
 gratuita mensal. Confira os preços atuais em
@@ -96,7 +123,8 @@ gasta a sua cota do Google sem ter comprado.
 
 Cada busca traz até 20 comércios; "Carregar mais" busca a próxima página (até 60 no total, limite do Google).
 
-**Funil de contatos:** o Google permite guardar só o ID de cada lugar. Por isso a aba "Meus contatos"
+**Funil de contatos:** no modo gratuito, os dados do comércio ficam guardados junto com o contato
+(os dados do OpenStreetMap são abertos) e abrir a aba não custa nada. No modo Google, o Google permite guardar só o ID de cada lugar. Por isso a aba "Meus contatos"
 guarda o ID e as anotações do usuário, e busca nome, endereço e telefone de novo no Google
 (`/api/places-details`) cada vez que é aberta. Cada comércio salvo conta como uma consulta de detalhes
 no Google a cada abertura da aba; leve isso em conta no limite de gastos.

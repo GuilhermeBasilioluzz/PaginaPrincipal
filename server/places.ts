@@ -1,7 +1,16 @@
+import { getNiche } from '../src/data/niches.js'
 import { distanceKm, type LatLng, type Lead, type PlaceInfo } from '../src/lib/leads.js'
+import { customSelectors, sanitizeText } from './osm.js'
+
+export type Provider = 'google' | 'osm'
 
 export interface SearchInput {
+  /** Fonte pedida pelo navegador: 'google' só quando a tela usa o mapa do Google. */
+  provider: Provider
+  /** Texto de busca no Google (nome do nicho ou texto livre). */
   query: string
+  /** Filtros do OpenStreetMap para o mesmo nicho. */
+  osmSelectors: string[]
   lat: number
   lng: number
   radiusMeters: number
@@ -12,16 +21,28 @@ export interface SearchInput {
 export function parseSearchInput(body: unknown): SearchInput | string {
   if (!body || typeof body !== 'object') return 'pedido inválido'
   const b = body as Record<string, unknown>
-  const query = typeof b.query === 'string' ? b.query.trim() : ''
   const lat = Number(b.lat)
   const lng = Number(b.lng)
   const radiusMeters = Number(b.radiusMeters)
-  if (query.length < 2 || query.length > 80) return 'informe o tipo de comércio'
+
+  // O nicho é resolvido aqui no servidor: o navegador nunca envia filtros prontos.
+  let query = ''
+  let osmSelectors: string[] = []
+  const niche = typeof b.nicheId === 'string' ? getNiche(b.nicheId) : undefined
+  if (niche) {
+    query = niche.query
+    osmSelectors = niche.osm
+  } else if (b.nicheId === 'custom' && typeof b.text === 'string') {
+    query = sanitizeText(b.text)
+    osmSelectors = customSelectors(b.text)
+  }
+  if (query.length < 2) return 'informe o tipo de comércio'
   // Limites aproximados do território brasileiro.
   if (!(lat >= -34 && lat <= 6 && lng >= -75 && lng <= -28)) return 'escolha um ponto dentro do Brasil'
   if (!(radiusMeters >= 500 && radiusMeters <= 50_000)) return 'raio inválido'
   const pageToken = typeof b.pageToken === 'string' && b.pageToken.length < 2000 ? b.pageToken : undefined
-  return { query, lat, lng, radiusMeters, pageToken }
+  const provider: Provider = b.provider === 'google' ? 'google' : 'osm'
+  return { provider, query, osmSelectors, lat, lng, radiusMeters, pageToken }
 }
 
 /** Campos pedidos ao Google. Cada campo extra pode mudar o preço da busca. */
@@ -72,6 +93,7 @@ export function toPlaceInfo(p: GooglePlace): PlaceInfo | null {
   if (!p.id || lat === undefined || lng === undefined) return null
   return {
     id: p.id,
+    source: 'google',
     name: p.displayName?.text ?? 'Sem nome',
     address: p.formattedAddress ?? '',
     lat,

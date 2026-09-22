@@ -6,7 +6,7 @@ import { buildMessage, whatsappWithText } from './outreach'
 const niche = getNiche('barbearia')!
 function place(partial: Partial<PlaceInfo>): PlaceInfo {
   return {
-    id: 'p', name: 'Barbearia do Zé', address: 'Rua A', lat: 0, lng: 0, rating: 4.9, reviews: 312,
+    source: 'google', id: 'p', name: 'Barbearia do Zé', address: 'Rua A', lat: 0, lng: 0, rating: 4.9, reviews: 312,
     phone: '(11) 98765-4321', website: null, mapsUrl: null, operational: true, ...partial,
   }
 }

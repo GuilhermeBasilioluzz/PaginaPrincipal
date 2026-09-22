@@ -1,5 +1,6 @@
 import type { Niche } from '../data/niches'
-import { distanceKm, type LatLng, type Lead } from './leads'
+import { distanceKm, type LatLng, type Lead, type LeadSource } from './leads'
+import { mapsConfigured } from './maps'
 import { demoMode, supabase } from './supabase'
 
 export interface SearchParams {
@@ -10,6 +11,7 @@ export interface SearchParams {
 }
 
 export interface SearchResult {
+  provider: LeadSource
   leads: Lead[]
   nextPageToken: string | null
 }
@@ -27,7 +29,16 @@ export async function searchLeads({ niche, center, radiusKm, pageToken }: Search
   const res = await fetch('/api/places-search', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${data.session?.access_token ?? ''}` },
-    body: JSON.stringify({ query: niche.query, lat: center.lat, lng: center.lng, radiusMeters: radiusKm * 1000, pageToken }),
+    body: JSON.stringify({
+      // Os dados do Google só podem aparecer no mapa do Google.
+      provider: mapsConfigured ? 'google' : 'osm',
+      nicheId: niche.id,
+      text: niche.id === 'custom' ? niche.label : undefined,
+      lat: center.lat,
+      lng: center.lng,
+      radiusMeters: radiusKm * 1000,
+      pageToken,
+    }),
   })
   if (!res.ok) {
     const body = (await res.json().catch(() => ({}))) as { error?: string }
@@ -55,6 +66,7 @@ function demoLeads(niche: Niche, center: LatLng, radiusKm: number): SearchResult
     const point = { lat: center.lat + spread * Math.sin(angle), lng: center.lng + spread * Math.cos(angle) }
     return {
       id: `exemplo-${i}`,
+      source: 'demo' as const,
       name: `${niche.label} Exemplo ${i + 1}`,
       address: 'Endereço de exemplo',
       ...point,
@@ -67,5 +79,5 @@ function demoLeads(niche: Niche, center: LatLng, radiusKm: number): SearchResult
       distanceKm: Math.round(distanceKm(center, point) * 10) / 10,
     }
   })
-  return { leads, nextPageToken: null }
+  return { provider: 'demo', leads, nextPageToken: null }
 }

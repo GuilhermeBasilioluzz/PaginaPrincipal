@@ -43,13 +43,14 @@ export function useSavedLeads(enabled: boolean) {
     try {
       const list = await listSaved()
       setRows(list)
-      await loadMissingPlaces(list)
+      seedPlaces(list.flatMap((r) => (r.place_snapshot ? [r.place_snapshot] : [])))
+      await loadMissingPlaces(list.filter((r) => !r.place_snapshot))
     } catch (e) {
       setError((e as Error).message)
     } finally {
       setLoading(false)
     }
-  }, [loadMissingPlaces])
+  }, [loadMissingPlaces, seedPlaces])
 
   useEffect(() => {
     if (enabled) reload()

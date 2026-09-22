@@ -1,13 +1,17 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
+import LeafletMap from '../components/LeafletMap'
 import MapView from '../components/MapView'
 import type { SavedLeadsApi } from '../crm/useSavedLeads'
 import { statuses, type LeadStatus } from '../lib/crm'
 import { capitals, customNiche, niches, type Niche } from '../data/niches'
-import { sortLeads, type LatLng, type Lead, type LeadFilters, type LeadSort } from '../lib/leads'
+import { sortLeads, type LatLng, type Lead, type LeadFilters, type LeadSort, type LeadSource } from '../lib/leads'
 import { geocode, mapsConfigured } from '../lib/maps'
 import { searchLeads, type SearchParams } from '../lib/prospect'
 
 const radiusOptions = [1, 3, 5, 10, 20]
+
+/** Mapa do Google quando há chave; senão, o mapa gratuito do OpenStreetMap. */
+const MapComponent = mapsConfigured ? MapView : LeafletMap
 
 const sortLabels: Record<LeadSort, string> = {
   'rating-desc': 'Maiores notas',
@@ -40,7 +44,11 @@ export default function Prospect({ crm, onCreateProject }: Props) {
   const [nextPageToken, setNextPageToken] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [sort, setSort] = useState<LeadSort>('rating-desc')
+  const [sort, setSort] = useState<LeadSort>(mapsConfigured ? 'rating-desc' : 'distance')
+  // Fonte da última busca: o OpenStreetMap não tem notas, então a tela se adapta.
+  const [provider, setProvider] = useState<LeadSource>(mapsConfigured ? 'google' : 'osm')
+  const hasRatings = provider !== 'osm'
+  const sortOptions = (Object.keys(sortLabels) as LeadSort[]).filter((k) => hasRatings || k === 'distance')
   const [filters, setFilters] = useState<LeadFilters>({ withoutWebsite: false, withPhone: false })
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const listRef = useRef<HTMLOListElement>(null)
@@ -83,6 +91,8 @@ export default function Prospect({ crm, onCreateProject }: Props) {
     try {
       const result = await searchLeads(params)
       crm.seedPlaces(result.leads)
+      setProvider(result.provider)
+      if (result.provider === 'osm') setSort('distance')
       setNextPageToken(result.nextPageToken)
       if (more) {
         setLeads((prev) => [...prev, ...result.leads.filter((l) => !prev.some((p) => p.id === l.id))])
@@ -103,8 +113,9 @@ export default function Prospect({ crm, onCreateProject }: Props) {
       <p className="eyebrow">Prospecção</p>
       <h2 className="screen-title">Encontre comércios para atender</h2>
       <p className="muted">
-        Escolha o tipo de negócio e o lugar. Você vê quem existe na região, com nota, avaliações, telefone e site, e cria
-        o projeto do sistema para cada um.
+        Escolha o tipo de negócio e o lugar. Você vê quem existe na região
+        {mapsConfigured ? ', com nota, avaliações, telefone e site,' : ', com endereço, telefone e site quando informados,'} e
+        cria o projeto do sistema para cada um.
       </p>
 
       <div className="card prospect-controls">
@@ -149,11 +160,10 @@ export default function Prospect({ crm, onCreateProject }: Props) {
               id="prospect-place"
               aria-label="Cidade, bairro ou endereço"
               value={place}
-              disabled={!mapsConfigured}
-              placeholder={mapsConfigured ? 'Cidade, bairro ou endereço' : 'Busca de cidades disponível no site publicado'}
+              placeholder="Cidade, bairro ou endereço"
               onChange={(e) => setPlace(e.target.value)}
             />
-            <button className="btn btn-outline" disabled={!mapsConfigured || !place.trim()}>
+            <button className="btn btn-outline" disabled={!place.trim()}>
               Localizar
             </button>
           </form>
@@ -169,10 +179,8 @@ export default function Prospect({ crm, onCreateProject }: Props) {
               <>
                 Centro da busca: <strong>{placeLabel}</strong>
               </>
-            ) : mapsConfigured ? (
-              'Ou clique em qualquer ponto do mapa.'
             ) : (
-              'Escolha uma capital para testar.'
+              'Ou clique em qualquer ponto do mapa.'
             )}
           </p>
         </div>
@@ -196,7 +204,7 @@ export default function Prospect({ crm, onCreateProject }: Props) {
       </div>
 
       <div className="prospect-results">
-        <MapView
+        <MapComponent
           center={center}
           radiusKm={radiusKm}
           leads={visible}
@@ -211,13 +219,13 @@ export default function Prospect({ crm, onCreateProject }: Props) {
               <div className="lead-toolbar">
                 <p>
                   {searchedNiche.label}: <strong>{leads.length}</strong> {leads.length === 1 ? 'comércio' : 'comércios'} ·{' '}
-                  <strong>{withoutSite}</strong> sem site
+                  <strong>{withoutSite}</strong> {hasRatings ? 'sem site' : 'sem site informado'}
                 </p>
                 <div className="lead-toolbar-row">
                   <select aria-label="Ordenar" value={sort} onChange={(e) => setSort(e.target.value as LeadSort)}>
-                    {Object.entries(sortLabels).map(([value, label]) => (
+                    {sortOptions.map((value) => (
                       <option key={value} value={value}>
-                        {label}
+                        {sortLabels[value]}
                       </option>
                     ))}
                   </select>
@@ -227,7 +235,7 @@ export default function Prospect({ crm, onCreateProject }: Props) {
                       checked={filters.withoutWebsite}
                       onChange={(e) => setFilters({ ...filters, withoutWebsite: e.target.checked })}
                     />
-                    Sem site
+                    {hasRatings ? 'Sem site' : 'Sem site informado'}
                   </label>
                   <label className="check">
                     <input
@@ -253,7 +261,7 @@ export default function Prospect({ crm, onCreateProject }: Props) {
                     >
                       <div className="lead-head">
                         <h3>{lead.name}</h3>
-                        {lead.rating === null ? (
+                        {lead.source === 'osm' ? null : lead.rating === null ? (
                           <span className="lead-rating muted">Sem avaliações</span>
                         ) : (
                           <span className="lead-rating" title={`${lead.reviews} avaliações no Google`}>
@@ -265,7 +273,12 @@ export default function Prospect({ crm, onCreateProject }: Props) {
                         {lead.address} · {lead.distanceKm.toLocaleString('pt-BR')} km
                       </p>
                       <div className="lead-tags">
-                        {!lead.website && <span className="tag tag-hot">Sem site</span>}
+                        {!lead.website &&
+                          (lead.source === 'osm' ? (
+                            <span className="tag">Site não informado</span>
+                          ) : (
+                            <span className="tag tag-hot">Sem site</span>
+                          ))}
                         {!lead.operational && <span className="tag">Fechado</span>}
                         {lead.phone && <span className="tag">{lead.phone}</span>}
                         {lead.website && (
@@ -275,7 +288,7 @@ export default function Prospect({ crm, onCreateProject }: Props) {
                         )}
                         {lead.mapsUrl && (
                           <a className="tag" href={lead.mapsUrl} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>
-                            Ver no Google Maps ↗
+                            {lead.source === 'osm' ? 'Ver avaliações no Google ↗' : 'Ver no Google Maps ↗'}
                           </a>
                         )}
                       </div>
@@ -316,14 +329,25 @@ export default function Prospect({ crm, onCreateProject }: Props) {
                   {loading ? 'Carregando…' : 'Carregar mais comércios'}
                 </button>
               )}
-              <p className="attribution">Dados do Google Maps</p>
+              <p className="attribution">
+                {provider === 'osm' ? 'Dados © colaboradores do OpenStreetMap (ODbL)' : provider === 'google' ? 'Dados do Google Maps' : 'Dados de exemplo'}
+              </p>
             </>
           ) : (
             <div className="lead-empty">
               <strong>Os comércios aparecem aqui.</strong>
               <p className="muted">
-                Dica: comece pelos que têm <b>nota alta e nenhum site</b>. São negócios com clientes satisfeitos que ainda
-                não têm presença digital própria.
+                {mapsConfigured ? (
+                  <>
+                    Dica: comece pelos que têm <b>nota alta e nenhum site</b>. São negócios com clientes satisfeitos que
+                    ainda não têm presença digital própria.
+                  </>
+                ) : (
+                  <>
+                    Dica: use o filtro <b>sem site informado</b> e confira as avaliações de cada um no Google Maps antes de
+                    fazer contato.
+                  </>
+                )}
               </p>
             </div>
           )}

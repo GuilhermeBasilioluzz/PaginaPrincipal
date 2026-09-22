@@ -30,14 +30,16 @@ function compliment({ place }: MessageContext): string {
   if (place.rating !== null && place.rating >= 4) {
     return `Encontrei ${place.name} no Google e as avaliações dos clientes são muito boas.`
   }
+  if (place.source === 'osm') return `Encontrei ${place.name} pesquisando negócios aqui na região.`
   return `Encontrei ${place.name} no Google Maps aqui na região.`
 }
 
 /** A oportunidade: sem site, ou com site que pode trazer mais clientes. */
 function opportunity({ place }: MessageContext): string {
-  return place.website
-    ? 'Dei uma olhada no site de vocês e tive algumas ideias para ele trazer mais clientes.'
-    : 'Percebi que vocês ainda não têm um site ou sistema próprio para atender os clientes pela internet.'
+  if (place.website) return 'Dei uma olhada no site de vocês e tive algumas ideias para ele trazer mais clientes.'
+  // No OpenStreetMap a falta de site pode ser só falta de cadastro: pergunta em vez de afirmar.
+  if (place.source === 'osm') return 'Queria saber se vocês já têm um site ou sistema próprio para atender os clientes pela internet.'
+  return 'Percebi que vocês ainda não têm um site ou sistema próprio para atender os clientes pela internet.'
 }
 
 function hello(ctx: MessageContext): string {

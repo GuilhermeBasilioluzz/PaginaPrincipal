@@ -2,6 +2,7 @@ import { categories, getCategory, getSections } from '../data/categories'
 import PlanCard from '../components/PlanCard'
 import { formatBRL, lifetimePlan, monthlyPlan } from '../config/plans'
 import { generatePrompt } from '../lib/generatePrompt'
+import { mapsConfigured } from '../lib/maps'
 
 const sampleCategory = getCategory('scheduling')!
 const sampleIdea = 'Quero um app para minha barbearia onde os clientes marcam horário pelo celular.'
@@ -29,6 +30,18 @@ const promptParts = [
   { title: 'Padrão de qualidade', text: 'Segurança, organização e explicações no seu nível de experiência.' },
 ]
 
+/**
+ * Com a chave do Google configurada, a prospecção mostra notas e avaliações.
+ * Na versão gratuita (OpenStreetMap), os textos não prometem isso.
+ */
+const withRatings = mapsConfigured
+
+const pitchRows = [
+  { name: 'Barbearia Exemplo 1', rating: '4,9', reviews: 312, distance: '0,6 km', hot: true },
+  { name: 'Barbearia Exemplo 2', rating: '4,7', reviews: 158, distance: '1,2 km', hot: false },
+  { name: 'Barbearia Exemplo 3', rating: '4,2', reviews: 87, distance: '2,4 km', hot: true },
+]
+
 const faq = [
   {
     q: 'O que eu recebo no final?',
@@ -36,7 +49,9 @@ const faq = [
   },
   {
     q: 'De onde vêm os dados dos comércios?',
-    a: 'Do Google Maps, em tempo real: nome, endereço, nota, número de avaliações, telefone e site que o próprio comércio publicou.',
+    a: withRatings
+      ? 'Do Google Maps, em tempo real: nome, endereço, nota, número de avaliações, telefone e site que o próprio comércio publicou.'
+      : 'Do OpenStreetMap, o mapa colaborativo e aberto: nome, endereço, telefone e site quando cadastrados. Cada comércio tem um atalho para ver as avaliações no Google Maps.',
   },
   {
     q: 'O que significa acesso vitalício?',
@@ -136,11 +151,12 @@ export default function Landing({ onOpenGenerator }: { onOpenGenerator: () => vo
 
       <section className="wrap section prospect-pitch" id="prospeccao">
         <div className="pitch-copy">
-          <p className="eyebrow">Prospecção com Google Maps</p>
+          <p className="eyebrow">Prospecção no mapa</p>
           <h2 className="section-title">Escolha a cidade. Veja quem está esperando por um sistema.</h2>
           <p className="section-lead">
-            Selecione o tipo de comércio, clique em qualquer ponto do Brasil e veja os negócios da região com nota,
-            número de avaliações, telefone e site. Ordene pelas maiores ou menores notas e filtre quem ainda não tem site.
+            {withRatings
+              ? 'Selecione o tipo de comércio, clique em qualquer ponto do Brasil e veja os negócios da região com nota, número de avaliações, telefone e site. Ordene pelas maiores ou menores notas e filtre quem ainda não tem site.'
+              : 'Selecione o tipo de comércio, clique em qualquer ponto do Brasil e veja os negócios da região no mapa, com endereço, telefone, site e distância. Filtre quem não tem site informado e comece pelos mais próximos.'}
           </p>
           <ul className="pitch-points">
             <li>
@@ -149,7 +165,11 @@ export default function Landing({ onOpenGenerator }: { onOpenGenerator: () => vo
             </li>
             <li>
               <b>Os melhores alvos primeiro</b>
-              <span>Nota alta e nenhum site: clientes satisfeitos e nenhuma presença digital própria.</span>
+              <span>
+                {withRatings
+                  ? 'Nota alta e nenhum site: clientes satisfeitos e nenhuma presença digital própria.'
+                  : 'Filtre quem não tem site informado: negócios que ainda não têm presença digital própria.'}
+              </span>
             </li>
             <li>
               <b>Funil de contatos</b>
@@ -167,25 +187,35 @@ export default function Landing({ onOpenGenerator }: { onOpenGenerator: () => vo
         <div className="pitch-visual" aria-label="Ilustração da tela de prospecção com resultados de exemplo">
           <div className="pitch-map" aria-hidden>
             <span className="pitch-ring" />
-            <span className="map-pin" style={{ left: '38%', top: '34%' }}>4,9</span>
-            <span className="map-pin active" style={{ left: '56%', top: '48%' }}>4,7</span>
-            <span className="map-pin" style={{ left: '44%', top: '62%' }}>4,2</span>
-            <span className="map-pin" style={{ left: '63%', top: '30%' }}>3,8</span>
+            {[
+              ['38%', '34%', '4,9'],
+              ['56%', '48%', '4,7'],
+              ['44%', '62%', '4,2'],
+              ['63%', '30%', '3,8'],
+            ].map(([left, top, rating], i) => (
+              <span
+                key={i}
+                className={`map-pin${i === 1 ? ' active' : ''}${withRatings ? '' : ' map-pin-dot'}`}
+                style={{ left, top }}
+              >
+                {withRatings ? rating : ''}
+              </span>
+            ))}
           </div>
           <ol className="pitch-list">
-            {[
-              { name: 'Barbearia Exemplo 1', rating: '4,9', reviews: 312, hot: true },
-              { name: 'Barbearia Exemplo 2', rating: '4,7', reviews: 158, hot: false },
-              { name: 'Barbearia Exemplo 3', rating: '4,2', reviews: 87, hot: true },
-            ].map((l) => (
+            {pitchRows.map((l) => (
               <li key={l.name}>
                 <span>
                   <b>{l.name}</b>
                   {l.hot && <span className="tag tag-hot">Sem site</span>}
                 </span>
-                <span className="lead-rating">
-                  <b>{l.rating}</b> ★ <span>({l.reviews})</span>
-                </span>
+                {withRatings ? (
+                  <span className="lead-rating">
+                    <b>{l.rating}</b> ★ <span>({l.reviews})</span>
+                  </span>
+                ) : (
+                  <span className="muted small">{l.distance}</span>
+                )}
               </li>
             ))}
           </ol>

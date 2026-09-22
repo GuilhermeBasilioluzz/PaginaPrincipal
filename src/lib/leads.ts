@@ -1,13 +1,18 @@
 import type { Answers } from '../data/types'
 import type { Niche } from '../data/niches'
 
-/** Um comércio encontrado na busca do Google Maps. */
+/** De onde vieram os dados: Google (com notas), OpenStreetMap (grátis, sem notas) ou exemplos. */
+export type LeadSource = 'google' | 'osm' | 'demo'
+
+/** Um comércio encontrado na prospecção. */
 export interface Lead {
   id: string
+  source: LeadSource
   name: string
   address: string
   lat: number
   lng: number
+  /** Nota no Google; null quando não há nota ou a fonte não informa (OpenStreetMap). */
   rating: number | null
   reviews: number
   phone: string | null
@@ -61,13 +66,23 @@ export function sortLeads(leads: Lead[], sort: LeadSort, filters: LeadFilters): 
 /** Respostas já preenchidas para criar o projeto de um comércio específico. */
 export function answersFromLead(lead: PlaceInfo, niche: Niche): Answers {
   const reputation =
-    lead.rating !== null ? `nota ${lead.rating.toLocaleString('pt-BR')} no Google (${lead.reviews} avaliações)` : 'sem avaliações no Google'
+    lead.rating !== null
+      ? `nota ${lead.rating.toLocaleString('pt-BR')} no Google (${lead.reviews} avaliações)`
+      : lead.source === 'google'
+        ? 'sem avaliações no Google'
+        : null
+  // No OpenStreetMap, "sem site" pode ser só falta de cadastro.
+  const site = lead.website
+    ? `site atual: ${lead.website}`
+    : lead.source === 'osm'
+      ? 'site não informado (confirmar com o dono)'
+      : 'ainda não possui site'
   const answers: Answers = {
     projectName: lead.name,
     description: `Sistema para ${lead.name} (${niche.label.toLowerCase()}), no endereço ${lead.address}, com ${niche.idea}.`,
     audience: `Clientes de ${lead.name} e moradores da região`,
     mainGoal: 'Captar clientes',
-    extra: `Informações públicas do negócio: ${reputation}; ${lead.website ? `site atual: ${lead.website}` : 'ainda não possui site'}.`,
+    extra: `Informações públicas do negócio: ${[reputation, site].filter(Boolean).join('; ')}.`,
   }
   if (niche.categoryId === 'scheduling') answers.serviceType = niche.label
   if (niche.categoryId === 'landing') answers.business = `${niche.label}: ${lead.name}`
