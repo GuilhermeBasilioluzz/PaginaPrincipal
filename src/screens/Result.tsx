@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import type { Answers, Category } from '../data/types'
 import { generatePrompt } from '../lib/generatePrompt'
 
@@ -12,6 +12,7 @@ interface Props {
 export default function Result({ category, answers, onEdit, onRestart }: Props) {
   const prompt = useMemo(() => generatePrompt(category, answers), [category, answers])
   const [copied, setCopied] = useState(false)
+  const promptRef = useRef<HTMLPreElement>(null)
 
   async function copy() {
     try {
@@ -19,7 +20,8 @@ export default function Result({ category, answers, onEdit, onRestart }: Props) 
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch {
-      alert('Não foi possível copiar automaticamente. Selecione o texto e copie manualmente.')
+      // Sem acesso à área de transferência: seleciona o texto para a pessoa copiar manualmente.
+      if (promptRef.current) window.getSelection()?.selectAllChildren(promptRef.current)
     }
   }
 
@@ -36,7 +38,7 @@ export default function Result({ category, answers, onEdit, onRestart }: Props) 
     <section>
       <h2>Seu prompt está pronto ✨</h2>
       <p className="muted">Copie e cole no assistente de IA de sua preferência.</p>
-      <pre className="card prompt">{prompt}</pre>
+      <pre ref={promptRef} className="card prompt">{prompt}</pre>
       <div className="actions">
         <button className="btn" onClick={onEdit}>
           Editar respostas
