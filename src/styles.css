@@ -1,0 +1,128 @@
+:root {
+  --bg: #f7f7fb;
+  --surface: #ffffff;
+  --text: #1b1b29;
+  --muted: #62627a;
+  --border: #e2e2ec;
+  --primary: #5b4cf0;
+  --primary-text: #ffffff;
+  --primary-soft: #ecebfe;
+  --danger: #d93a3a;
+  --radius: 14px;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111118;
+    --surface: #1b1b26;
+    --text: #ececf4;
+    --muted: #9d9db5;
+    --border: #2d2d3d;
+    --primary: #8b7fff;
+    --primary-text: #111118;
+    --primary-soft: #2a2748;
+    --danger: #ff6b6b;
+    color-scheme: dark;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.5;
+}
+
+button { font: inherit; color: inherit; cursor: pointer; }
+input, textarea { font: inherit; color: inherit; }
+
+.topbar {
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  padding: 12px 16px;
+}
+.brand { background: none; border: 0; font-weight: 700; font-size: 1.1rem; padding: 0; }
+
+.container { max-width: 880px; margin: 0 auto; padding: 32px 16px 64px; }
+
+h1 { font-size: clamp(1.8rem, 5vw, 2.8rem); line-height: 1.15; margin: 0 0 16px; }
+h2 { margin: 8px 0 4px; }
+h3 { margin: 8px 0 4px; }
+.muted { color: var(--muted); }
+.small { font-size: 0.875rem; }
+.lead { font-size: 1.15rem; color: var(--muted); max-width: 640px; margin: 0 auto 28px; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+
+.btn {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-weight: 600;
+}
+.btn.primary { background: var(--primary); border-color: var(--primary); color: var(--primary-text); }
+.btn.lg { padding: 14px 28px; font-size: 1.1rem; }
+.btn:hover { filter: brightness(0.96); }
+.link { background: none; border: 0; color: var(--primary); padding: 0; font-weight: 600; }
+.link.center { display: block; margin: 24px auto 0; }
+
+/* Home */
+.hero { text-align: center; padding: 32px 0 40px; }
+.steps { list-style: none; padding: 0; margin: 0; display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.steps p { margin: 0; color: var(--muted); }
+.step-number {
+  display: inline-grid; place-items: center;
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--primary-soft); color: var(--primary); font-weight: 700;
+}
+
+/* Categorias */
+.category-grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); margin-top: 24px; }
+.category { display: flex; flex-direction: column; gap: 6px; text-align: left; transition: border-color .15s, transform .15s; }
+.category:hover, .category.selected { border-color: var(--primary); transform: translateY(-2px); }
+.category-icon { font-size: 2rem; }
+
+/* Questionário */
+.q-header { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.badge { background: var(--primary-soft); color: var(--primary); border-radius: 999px; padding: 4px 12px; font-weight: 600; font-size: 0.9rem; }
+.progress { height: 6px; background: var(--border); border-radius: 999px; margin: 12px 0 20px; overflow: hidden; }
+.progress > div { height: 100%; background: var(--primary); transition: width .25s; }
+
+.form { display: flex; flex-direction: column; gap: 20px; }
+.form h2 { margin: 0; }
+.form > .muted { margin: -12px 0 0; }
+.field { display: flex; flex-direction: column; gap: 8px; border: 0; padding: 0; margin: 0; min-width: 0; }
+.field label, .field legend { font-weight: 600; padding: 0; }
+.field legend { margin-bottom: 8px; }
+.field input, .field textarea {
+  width: 100%; border: 1px solid var(--border); border-radius: 10px;
+  padding: 10px 12px; background: var(--bg); resize: vertical;
+}
+.field input:focus, .field textarea:focus { outline: 2px solid var(--primary); outline-offset: 1px; }
+.field.invalid input, .field.invalid textarea, .field.invalid .chip { border-color: var(--danger); }
+.required, .error { color: var(--danger); }
+.error { margin: 0; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { border: 1px solid var(--border); background: var(--bg); border-radius: 999px; padding: 6px 14px; }
+.chip.active { background: var(--primary); border-color: var(--primary); color: var(--primary-text); }
+
+.actions { display: flex; justify-content: space-between; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+.actions-right { display: flex; gap: 12px; flex-wrap: wrap; }
+
+/* Resultado */
+.prompt {
+  white-space: pre-wrap; word-break: break-word; margin-top: 16px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.9rem;
+  max-height: 60vh; overflow: auto;
+}
