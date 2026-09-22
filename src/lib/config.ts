@@ -9,6 +9,19 @@ export function isGoogleKey(value: string | undefined): boolean {
 
 const PLACEHOLDERS = ['SEU-PROJETO', 'sua-chave']
 
+/**
+ * Deixa só o endereço base do Supabase. Aceita valores copiados com caminho no final
+ * (ex.: https://abc.supabase.co/rest/v1/), que fariam o login bater no lugar errado.
+ */
+export function normalizeSupabaseUrl(url: string | undefined): string {
+  const u = url?.trim() ?? ''
+  try {
+    return new URL(u).origin
+  } catch {
+    return u
+  }
+}
+
 /** Problemas na configuração do Supabase do site, em linguagem simples. Lista vazia = tudo certo. */
 export function supabaseConfigProblems(url: string | undefined, anonKey: string | undefined): string[] {
   const problems: string[] = []

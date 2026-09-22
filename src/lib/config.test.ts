@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { isGoogleKey, supabaseConfigProblems } from './config'
+import { isGoogleKey, normalizeSupabaseUrl, supabaseConfigProblems } from './config'
 
 describe('supabaseConfigProblems', () => {
   it('aceita uma configuração válida', () => {
@@ -16,6 +16,14 @@ describe('supabaseConfigProblems', () => {
       'VITE_SUPABASE_URL precisa começar com https:// (sem aspas nem espaços).',
       'VITE_SUPABASE_ANON_KEY tem aspas ou espaços.',
     ])
+  })
+})
+
+describe('normalizeSupabaseUrl', () => {
+  it('remove caminhos copiados junto com o endereço', () => {
+    expect(normalizeSupabaseUrl('https://abc.supabase.co/rest/v1/')).toBe('https://abc.supabase.co')
+    expect(normalizeSupabaseUrl(' https://abc.supabase.co ')).toBe('https://abc.supabase.co')
+    expect(normalizeSupabaseUrl('nao-e-url')).toBe('nao-e-url')
   })
 })
 
