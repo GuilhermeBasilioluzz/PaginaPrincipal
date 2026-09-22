@@ -155,7 +155,7 @@ mark { background: linear-gradient(transparent 12%, var(--mark) 12%, var(--mark)
 }
 .hero-grid { display: grid; grid-template-columns: 1.05fr 1fr; gap: 56px; align-items: center; }
 .hero-copy { display: flex; flex-direction: column; gap: 22px; }
-.hero h1 { font-size: clamp(2.4rem, 5.4vw, 4.1rem); line-height: 1.02; letter-spacing: -0.035em; font-weight: 900; }
+.hero h1 { font-size: clamp(2.3rem, 4.6vw, 3.5rem); line-height: 1.02; letter-spacing: -0.035em; font-weight: 900; }
 .hero-lead { font-size: 1.15rem; color: var(--muted); max-width: 34em; }
 .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 6px; }
 

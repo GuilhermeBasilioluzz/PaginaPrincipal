@@ -72,7 +72,7 @@ export default function Questionnaire({ category, answers, onChange, onBack, onF
           Voltar
         </button>
         <button className="btn primary" onClick={next}>
-          {isLast ? 'Gerar prompt' : 'Próximo'}
+          {isLast ? 'Gerar meu projeto' : 'Próximo'}
         </button>
       </div>
     </section>

@@ -108,7 +108,7 @@ export default function App() {
             )}
             {onLanding && (
               <button className="btn btn-small btn-outline" onClick={() => setScreen('categories')}>
-                {canUse ? 'Abrir gerador' : 'Entrar'}
+                {canUse ? 'Criar projeto' : 'Entrar'}
               </button>
             )}
           </nav>

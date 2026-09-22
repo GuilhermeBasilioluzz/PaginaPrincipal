@@ -6,8 +6,9 @@ import { generatePrompt } from '../lib/generatePrompt'
 const sampleCategory = getCategory('scheduling')!
 const sampleIdea = 'Quero um app para minha barbearia onde os clientes marcam horário pelo celular.'
 
-// O exemplo do topo é gerado pelo próprio gerador, então sempre mostra a saída real.
-const samplePrompt = generatePrompt(sampleCategory, {
+// O exemplo do topo é gerado pelo próprio sistema, então sempre mostra a saída real
+// (a partir da descrição, sem as instruções iniciais).
+const sampleLines = generatePrompt(sampleCategory, {
   projectName: 'AgendaFácil',
   description: sampleIdea,
   mainGoal: 'Captar clientes',
@@ -17,25 +18,25 @@ const samplePrompt = generatePrompt(sampleCategory, {
   experience: 'Iniciante',
 })
   .split('\n')
-  .slice(0, 22)
+const samplePrompt = sampleLines.slice(sampleLines.indexOf('# Descrição do sistema'), sampleLines.indexOf('# Descrição do sistema') + 20)
 
 const promptParts = [
-  { title: 'Papel', text: 'A IA assume o papel de especialista no seu tipo de sistema.' },
-  { title: 'Contexto', text: 'Público, objetivo e a sua descrição, organizados.' },
-  { title: 'Requisitos do segmento', text: 'Pagamentos, agenda, catálogo, telas: o que importa no seu nicho.' },
-  { title: 'Requisitos técnicos', text: 'Tecnologias e prioridades, ou o pedido para a IA recomendar.' },
-  { title: 'Entregáveis', text: 'Exatamente o que a IA deve entregar, em etapas.' },
-  { title: 'Regras e formato', text: 'Como a IA deve responder, no seu nível de experiência.' },
+  { title: 'Visão do sistema', text: 'A sua ideia descrita com clareza, do jeito que um especialista descreveria.' },
+  { title: 'Público e objetivo', text: 'Para quem é, o que precisa resolver e como medir se deu certo.' },
+  { title: 'Regras do seu nicho', text: 'Pagamentos, agenda, catálogo, telas: o que não pode faltar no seu segmento.' },
+  { title: 'Base técnica', text: 'Tecnologias e prioridades, ou a recomendação certa quando você não sabe.' },
+  { title: 'Entregas por etapa', text: 'O que precisa ser construído, em ordem, começando por uma primeira versão.' },
+  { title: 'Padrão de qualidade', text: 'Segurança, organização e explicações no seu nível de experiência.' },
 ]
 
 const faq = [
   {
-    q: 'Funciona com qual IA?',
-    a: 'Com qualquer uma: Claude, ChatGPT, Gemini, Claude Code, Lovable e outras. O prompt é texto: basta copiar e colar.',
+    q: 'O que eu recebo no final?',
+    a: 'Um projeto técnico completo do seu sistema, em texto. Com ele você constrói usando as ferramentas de criação com inteligência artificial que preferir, ou entrega a um desenvolvedor: fica claro exatamente o que precisa ser feito.',
   },
   {
     q: 'O que significa acesso vitalício?',
-    a: 'Você paga uma única vez e usa o gerador sem mensalidade, incluindo as novas categorias e melhorias.',
+    a: 'Você paga uma única vez e usa o sistema sem mensalidade, incluindo as novas categorias e melhorias.',
   },
   {
     q: 'Posso cancelar o plano mensal?',
@@ -47,7 +48,7 @@ const faq = [
   },
   {
     q: 'Preciso saber programar?',
-    a: 'Não. As perguntas são em linguagem simples, e o prompt pede para a IA explicar tudo no seu nível.',
+    a: 'Não. As perguntas são em linguagem simples, e o projeto já considera o seu nível de experiência.',
   },
 ]
 
@@ -69,13 +70,14 @@ export default function Landing({ onOpenGenerator }: { onOpenGenerator: () => vo
       <section className="hero">
         <div className="wrap hero-grid">
           <div className="hero-copy">
-            <p className="eyebrow">Gerador de prompts para criar sistemas com IA</p>
+            <p className="eyebrow">Para quem quer criar o próprio sistema</p>
             <h1>
-              Uma frase entra. Um <mark>prompt completo</mark> sai.
+              Sua ideia de sistema, <mark>pronta para ser construída</mark>.
             </h1>
             <p className="hero-lead">
-              Descreva o sistema com as suas palavras. O PromptForge faz as perguntas que um desenvolvedor faria e
-              monta o prompt detalhado que a IA precisa para construir o que você imaginou.
+              Conte com as suas palavras o que você quer criar. O PromptForge faz as perguntas que um especialista
+              faria e transforma a sua ideia em um projeto completo, com funcionalidades, regras e etapas de construção.
+              Você sai com o caminho claro para lançar a sua loja, app ou plataforma.
             </p>
             <div className="hero-actions">
               <a className="btn btn-primary" href="#precos">
@@ -87,7 +89,7 @@ export default function Landing({ onOpenGenerator }: { onOpenGenerator: () => vo
             </div>
           </div>
 
-          <div className="transform" aria-label="Exemplo: uma frase vira um prompt completo">
+          <div className="transform" aria-label="Exemplo: uma frase vira um projeto completo">
             <div className="idea">
               <span className="sheet-label">Você escreve</span>
               <p>“{sampleIdea}”</p>
@@ -97,7 +99,7 @@ export default function Landing({ onOpenGenerator }: { onOpenGenerator: () => vo
             </div>
             <div className="sheet">
               <div className="sheet-bar">
-                <span className="sheet-label">prompt.md</span>
+                <span className="sheet-label">projeto.md</span>
                 <span className="sheet-meta">gerado pelo PromptForge</span>
               </div>
               <pre className="sheet-body">
@@ -112,10 +114,10 @@ export default function Landing({ onOpenGenerator }: { onOpenGenerator: () => vo
 
       <section className="band" id="como-funciona">
         <div className="wrap">
-          <h2 className="section-title">Um prompt vago gera um sistema genérico.</h2>
+          <h2 className="section-title">Uma ideia vaga vira um sistema genérico.</h2>
           <p className="section-lead">
-            “Faz um app de agendamento” deixa a IA adivinhar quase tudo. O PromptForge preenche as lacunas antes, e
-            cada prompt sai com as mesmas seis partes:
+            “Quero um app de agendamento” deixa quase tudo em aberto. O PromptForge preenche essas lacunas antes de
+            você começar, e cada projeto sai com as mesmas seis partes:
           </p>
           <ol className="parts">
             {promptParts.map((p) => (

@@ -29,7 +29,7 @@ export default function Result({ category, answers, onEdit, onRestart }: Props) 
     const url = URL.createObjectURL(new Blob([prompt], { type: 'text/markdown' }))
     const a = document.createElement('a')
     a.href = url
-    a.download = 'prompt.md'
+    a.download = 'projeto.md'
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -37,8 +37,8 @@ export default function Result({ category, answers, onEdit, onRestart }: Props) 
   return (
     <section>
       <p className="eyebrow">Passo 3 de 3</p>
-      <h2 className="screen-title">Seu prompt está pronto</h2>
-      <p className="muted">Copie e cole no assistente de IA de sua preferência.</p>
+      <h2 className="screen-title">Seu projeto está pronto</h2>
+      <p className="muted">Copie ou baixe o projeto e use como guia para construir o seu sistema.</p>
       <pre ref={promptRef} className="card prompt">{prompt}</pre>
       <div className="actions">
         <button className="btn" onClick={onEdit}>
@@ -49,12 +49,12 @@ export default function Result({ category, answers, onEdit, onRestart }: Props) 
             Baixar .md
           </button>
           <button className="btn primary" onClick={copy}>
-            {copied ? 'Copiado!' : 'Copiar prompt'}
+            {copied ? 'Copiado!' : 'Copiar projeto'}
           </button>
         </div>
       </div>
       <button className="link center" onClick={onRestart}>
-        Criar outro prompt
+        Criar outro projeto
       </button>
     </section>
   )

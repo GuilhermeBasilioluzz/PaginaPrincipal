@@ -30,7 +30,7 @@ export const lifetimePlan: Plan = {
   features: [
     'Acesso para sempre, sem mensalidade',
     'Todas as categorias e questionários',
-    'Prompts ilimitados',
+    'Projetos ilimitados',
     'Novas categorias e melhorias incluídas',
   ],
 }
@@ -44,7 +44,7 @@ export const monthlyPlan: Plan = {
   cta: 'Assinar plano mensal',
   features: [
     'Todas as categorias e questionários',
-    'Prompts ilimitados',
+    'Projetos ilimitados',
     'Novas categorias e melhorias incluídas',
     'Cancele quando quiser',
   ],

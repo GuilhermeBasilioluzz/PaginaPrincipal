@@ -13,7 +13,7 @@ interface Props {
 function reason(access: AccessRow | null): string {
   if (!access) return 'Ainda não encontramos uma compra com este e-mail.'
   if (access.status === 'revoked') return 'O acesso deste e-mail foi encerrado após reembolso ou contestação do pagamento.'
-  return 'A sua assinatura mensal expirou. Renove para continuar usando o gerador.'
+  return 'A sua assinatura mensal expirou. Renove para continuar usando o PromptForge.'
 }
 
 export default function NoAccess({ email, access, onRefresh, onSignOut }: Props) {
