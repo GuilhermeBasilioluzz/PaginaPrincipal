@@ -1,6 +1,9 @@
 import { importLibrary, setOptions } from '@googlemaps/js-api-loader'
+import { isGoogleKey } from './config'
 
-const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined
+// Só uma chave com o formato real do Google liga o modo Google; qualquer outro valor usa o mapa gratuito.
+const rawKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined
+const apiKey = isGoogleKey(rawKey) ? rawKey!.trim() : undefined
 
 /** ID de estilo do mapa (Google Cloud → Map Management). O de demonstração serve para testes. */
 export const mapId = (import.meta.env.VITE_GOOGLE_MAPS_MAP_ID as string | undefined) || 'DEMO_MAP_ID'

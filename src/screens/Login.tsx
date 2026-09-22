@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { explainSendError } from '../lib/authErrors'
 import { supabase } from '../lib/supabase'
 
 export default function Login({ onBack }: { onBack: () => void }) {
@@ -18,8 +19,10 @@ export default function Login({ onBack }: { onBack: () => void }) {
       options: { emailRedirectTo: window.location.origin },
     })
     setBusy(false)
-    if (error) setError('Não foi possível enviar o e-mail. Confira o endereço e tente de novo em alguns minutos.')
-    else setSent(true)
+    if (error) {
+      console.error('Falha ao enviar o e-mail de login', error)
+      setError(explainSendError(error))
+    } else setSent(true)
   }
 
   async function verifyCode(e: FormEvent) {

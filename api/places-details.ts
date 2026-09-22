@@ -1,3 +1,4 @@
+import { isGoogleKey } from '../src/lib/config.js'
 import type { PlaceInfo } from '../src/lib/leads.js'
 import { requireAccess } from '../server/auth.js'
 import { DETAILS_FIELD_MASK, parseDetailsInput, toPlaceInfo, type GooglePlace } from '../server/places.js'
@@ -9,7 +10,7 @@ import { DETAILS_FIELD_MASK, parseDetailsInput, toPlaceInfo, type GooglePlace } 
  */
 export async function POST(request: Request): Promise<Response> {
   const apiKey = process.env.GOOGLE_PLACES_API_KEY
-  if (!apiKey) return Response.json({ error: 'busca não configurada' }, { status: 500 })
+  if (!isGoogleKey(apiKey)) return Response.json({ error: 'busca não configurada' }, { status: 500 })
 
   const auth = await requireAccess(request)
   if ('error' in auth) return auth.error
@@ -26,7 +27,7 @@ export async function POST(request: Request): Promise<Response> {
   const results = await Promise.all(
     ids.map(async (id) => {
       const res = await fetch(`https://places.googleapis.com/v1/places/${encodeURIComponent(id)}?languageCode=pt-BR`, {
-        headers: { 'X-Goog-Api-Key': apiKey, 'X-Goog-FieldMask': DETAILS_FIELD_MASK },
+        headers: { 'X-Goog-Api-Key': apiKey!.trim(), 'X-Goog-FieldMask': DETAILS_FIELD_MASK },
       })
       if (!res.ok) {
         console.error('Erro no detalhe do Google', id, res.status)
