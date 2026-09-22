@@ -1,3 +1,4 @@
+import { isGoogleKey } from '../src/lib/config.js'
 import { requireAccess } from '../server/auth.js'
 import { searchOsm } from '../server/osm.js'
 import { buildGoogleRequest, FIELD_MASK, parseSearchInput, toLeads } from '../server/places.js'
@@ -24,10 +25,10 @@ export async function POST(request: Request): Promise<Response> {
   const center = { lat: input.lat, lng: input.lng }
 
   const apiKey = process.env.GOOGLE_PLACES_API_KEY
-  if (input.provider === 'google' && apiKey) {
+  if (input.provider === 'google' && isGoogleKey(apiKey)) {
     const google = await fetch('https://places.googleapis.com/v1/places:searchText', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Goog-Api-Key': apiKey, 'X-Goog-FieldMask': FIELD_MASK },
+      headers: { 'Content-Type': 'application/json', 'X-Goog-Api-Key': apiKey!.trim(), 'X-Goog-FieldMask': FIELD_MASK },
       body: JSON.stringify(buildGoogleRequest(input)),
     })
     if (!google.ok) {

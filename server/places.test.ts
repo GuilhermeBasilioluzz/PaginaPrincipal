@@ -62,7 +62,7 @@ describe('toLeads', () => {
 describe('POST /api/places-search', () => {
   beforeEach(() => {
     vi.resetModules()
-    process.env.GOOGLE_PLACES_API_KEY = 'google-key'
+    process.env.GOOGLE_PLACES_API_KEY = 'AIzaTeste0123456789abcdefghijklmnopqrst'
     process.env.SUPABASE_URL = 'https://exemplo.supabase.co'
     process.env.SUPABASE_SERVICE_ROLE_KEY = 'service'
   })
@@ -104,7 +104,7 @@ describe('POST /api/places-search', () => {
     expect(body.leads[0].name).toBe('B')
     expect(body.nextPageToken).toBe('n2')
     const [, init] = fetchSpy.mock.calls[0]
-    expect((init!.headers as Record<string, string>)['X-Goog-Api-Key']).toBe('google-key')
+    expect((init!.headers as Record<string, string>)['X-Goog-Api-Key']).toBe('AIzaTeste0123456789abcdefghijklmnopqrst')
     fetchSpy.mockRestore()
   })
 })
@@ -130,7 +130,7 @@ describe('detalhes dos comércios salvos', () => {
 
   it('devolve os comércios encontrados e avisa os que sumiram', async () => {
     vi.resetModules()
-    process.env.GOOGLE_PLACES_API_KEY = 'google-key'
+    process.env.GOOGLE_PLACES_API_KEY = 'AIzaTeste0123456789abcdefghijklmnopqrst'
     process.env.SUPABASE_URL = 'https://exemplo.supabase.co'
     process.env.SUPABASE_SERVICE_ROLE_KEY = 'service'
     vi.doMock('@supabase/supabase-js', () => ({
@@ -220,5 +220,22 @@ describe('busca gratuita (OpenStreetMap)', () => {
     expect(body.leads[0].name).toBe('Barbearia OSM')
     expect(String(fetchSpy.mock.calls[0][0])).toContain('overpass')
     fetchSpy.mockRestore()
+  })
+})
+
+describe('GET /api/status', () => {
+  it('diz o que está configurado sem mostrar nenhum valor', async () => {
+    process.env.SUPABASE_URL = 'https://abcd.supabase.co'
+    process.env.SUPABASE_SERVICE_ROLE_KEY = 'segredo-super-secreto'
+    delete process.env.CAKTO_WEBHOOK_SECRET
+    process.env.GOOGLE_PLACES_API_KEY = 'valor-de-exemplo'
+    const { GET } = await import('../api/status')
+    const text = await GET().text()
+    expect(text).not.toContain('segredo-super-secreto')
+    expect(text).not.toContain('abcd.supabase.co')
+    const body = JSON.parse(text)
+    expect(body.supabase).toEqual({ SUPABASE_URL: 'ok', SUPABASE_SERVICE_ROLE_KEY: 'ok' })
+    expect(body.cakto.CAKTO_WEBHOOK_SECRET).toContain('faltando')
+    expect(body.mapa).toContain('não parece uma chave do Google')
   })
 })

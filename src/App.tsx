@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useAccess } from './auth/useAccess'
 import { getCategory } from './data/categories'
+import { configProblems } from './lib/supabase'
 import type { Answers } from './data/types'
 import Landing from './screens/Landing'
 import Login from './screens/Login'
@@ -62,8 +63,20 @@ export default function App() {
         return <p className="muted center-text">Carregando…</p>
       case 'unconfigured':
         return (
-          <div className="card notice">
-            <p>O login ainda não foi configurado neste site. Tente novamente mais tarde.</p>
+          <div className="card config-problems">
+            <p>
+              <strong>O login ainda não foi configurado neste site.</strong>
+            </p>
+            <p className="muted">Para quem administra o site: confira na Vercel (Settings → Environment Variables):</p>
+            <ul>
+              {configProblems.map((p) => (
+                <li key={p}>{p}</li>
+              ))}
+            </ul>
+            <p className="muted small">
+              Depois de corrigir, publique de novo em Deployments → ⋯ → Redeploy. As variáveis que começam com VITE_ só
+              entram no site numa nova publicação.
+            </p>
           </div>
         )
       case 'signed-out':
