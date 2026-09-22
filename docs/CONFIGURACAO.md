@@ -24,6 +24,7 @@ Quem tem o vitalício nunca perde o acesso por causa de um evento do plano mensa
 
 1. Crie uma conta em [supabase.com](https://supabase.com) e um novo projeto.
 2. **SQL Editor → New query**: cole todo o conteúdo de [`supabase/schema.sql`](../supabase/schema.sql) e clique em **Run**.
+   O arquivo pode ser rodado de novo sem problema; se ele mudar em uma atualização, rode outra vez.
 3. **Authentication → URL Configuration**:
    - *Site URL*: o endereço do seu site (ex.: `https://promptforge.vercel.app`).
 4. **Authentication → Emails → Magic Link**: para o cliente também receber um código de 6 dígitos,
@@ -94,6 +95,11 @@ Como funciona por dentro: o mapa roda no navegador, mas a busca de comércios pa
 gasta a sua cota do Google sem ter comprado.
 
 Cada busca traz até 20 comércios; "Carregar mais" busca a próxima página (até 60 no total, limite do Google).
+
+**Funil de contatos:** o Google permite guardar só o ID de cada lugar. Por isso a aba "Meus contatos"
+guarda o ID e as anotações do usuário, e busca nome, endereço e telefone de novo no Google
+(`/api/places-details`) cada vez que é aberta. Cada comércio salvo conta como uma consulta de detalhes
+no Google a cada abertura da aba; leve isso em conta no limite de gastos.
 
 > Regras do Google: os dados dos comércios podem ser exibidos, mas não copiados para uma base própria
 > (a exceção é o ID do lugar). Por isso a lista não tem exportação para planilha.

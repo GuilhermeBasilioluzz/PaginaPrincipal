@@ -20,6 +20,12 @@ export const overviewSection: Section = {
       required: true,
     },
     {
+      id: 'problem',
+      label: 'Que problema esse sistema resolve hoje?',
+      type: 'textarea',
+      placeholder: 'Ex.: os clientes ligam o dia todo para marcar horário e a agenda de papel vive dando conflito.',
+    },
+    {
       id: 'audience',
       label: 'Quem vai usar?',
       type: 'text',
@@ -45,6 +51,12 @@ export const technicalSection: Section = {
       label: 'Tecnologias preferidas',
       type: 'text',
       placeholder: 'Ex.: React, Node.js, PostgreSQL',
+    },
+    {
+      id: 'deadline',
+      label: 'Prazo desejado para a primeira versão',
+      type: 'single',
+      options: ['Até 1 mês', '1 a 3 meses', 'Mais de 3 meses', 'Sem prazo definido'],
     },
     {
       id: 'experience',
@@ -92,12 +104,24 @@ export const categories: Category[] = [
           { id: 'ecommerceFeatures', label: 'Funcionalidades desejadas', type: 'multi', options: ['Cupons de desconto', 'Avaliações de clientes', 'Lista de desejos', 'Carrinho abandonado', 'Painel de estoque', 'Área do cliente'] },
         ],
       },
+      {
+        id: 'ecommerce-operation',
+        title: 'Operação e divulgação',
+        questions: [
+          { id: 'physicalStore', label: 'Também tem loja física?', type: 'single', options: ['Sim, e o estoque é compartilhado', 'Sim, com estoque separado', 'Não, só online'] },
+          { id: 'averageTicket', label: 'Valor médio de uma compra', type: 'single', options: ['Até R$ 100', 'R$ 100 a R$ 300', 'R$ 300 a R$ 1.000', 'Acima de R$ 1.000'] },
+          { id: 'invoice', label: 'Emite nota fiscal?', type: 'single', options: ['Sim, precisa ser automática', 'Sim, faço manualmente', 'Não'] },
+          { id: 'ecommerceIntegrations', label: 'Integrações desejadas', type: 'multi', options: ['WhatsApp', 'Instagram / Facebook Shop', 'Google Shopping', 'Marketplaces (Mercado Livre, Shopee)', 'Sistema de gestão (ERP)', 'E-mail marketing'] },
+          { id: 'differential', label: 'O que diferencia a sua loja das concorrentes?', type: 'textarea', placeholder: 'Ex.: peças exclusivas, entrega no mesmo dia na cidade, atendimento personalizado' },
+        ],
+      },
     ],
     deliverables: [
       'Arquitetura da aplicação e modelo de dados (produtos, pedidos, clientes, estoque)',
       'Fluxo completo de compra, do catálogo à confirmação do pedido',
       'Integração com gateway de pagamento e cálculo de frete',
       'Painel administrativo para gerenciar produtos e pedidos',
+      'Integrações de divulgação e de emissão de nota fiscal, se aplicável',
     ],
   },
   {
@@ -124,12 +148,25 @@ export const categories: Category[] = [
           { id: 'saasFeatures', label: 'Funcionalidades desejadas', type: 'multi', options: ['Dashboard com gráficos', 'Relatórios exportáveis', 'Notificações por e-mail', 'Permissões por perfil', 'Integração via API', 'Log de auditoria'] },
         ],
       },
+      {
+        id: 'saas-rules',
+        title: 'Processos e regras',
+        questions: [
+          { id: 'currentTool', label: 'Como esse trabalho é feito hoje?', type: 'single', options: ['Planilhas', 'Papel / caderno', 'Outro sistema', 'WhatsApp e memória', 'Ainda não existe'] },
+          { id: 'workflows', label: 'Descreva o processo principal, passo a passo', type: 'textarea', placeholder: 'Ex.: cliente pede orçamento → técnico visita → orçamento aprovado → serviço → cobrança' },
+          { id: 'usersCount', label: 'Quantas pessoas vão usar ao mesmo tempo?', type: 'single', options: ['Até 10', '10 a 100', 'Mais de 100'] },
+          { id: 'saasIntegrations', label: 'Integrações necessárias', type: 'multi', options: ['WhatsApp', 'E-mail', 'Pagamentos (Pix/cartão)', 'Nota fiscal', 'Google Agenda', 'Importar planilhas'] },
+          { id: 'sensitiveData', label: 'Vai guardar dados pessoais ou sensíveis (LGPD)?', type: 'single', options: ['Sim, dados pessoais', 'Sim, dados de saúde ou financeiros', 'Não', 'Não sei'] },
+          { id: 'saasMobile', label: 'Vai ser usado no celular?', type: 'single', options: ['Principalmente no celular', 'No celular e no computador', 'Só no computador'] },
+        ],
+      },
     ],
     deliverables: [
       'Arquitetura (incluindo estratégia multi-tenant, se aplicável) e modelo de dados',
       'Sistema de autenticação e controle de acesso por perfil',
       'CRUDs das entidades principais e dashboard inicial',
       'Estratégia de planos e cobrança, se houver',
+      'Adequação à LGPD e plano para migrar os dados que existem hoje',
     ],
   },
   {
@@ -155,11 +192,24 @@ export const categories: Category[] = [
           { id: 'brand', label: 'Cores, logo e referências', type: 'textarea', placeholder: 'Ex.: azul-marinho e dourado; gosto do estilo do site X' },
         ],
       },
+      {
+        id: 'landing-growth',
+        title: 'Captação e resultados',
+        questions: [
+          { id: 'leadCapture', label: 'Como captar os contatos?', type: 'multi', options: ['Botão de WhatsApp', 'Formulário', 'Agendamento online', 'Chat no site', 'Lista de e-mails'] },
+          { id: 'searchTerms', label: 'Como os clientes procuram esse negócio no Google?', type: 'text', placeholder: 'Ex.: advogado trabalhista em Campinas' },
+          { id: 'competitors', label: 'Concorrentes ou sites de referência', type: 'text', placeholder: 'Ex.: site do concorrente X, página Y que eu gosto' },
+          { id: 'domain', label: 'Já tem domínio (endereço .com.br)?', type: 'single', options: ['Sim', 'Não, preciso registrar', 'Não sei o que é'] },
+          { id: 'contentUpdates', label: 'Quem vai atualizar o conteúdo?', type: 'single', options: ['O próprio dono, com um painel simples', 'Um desenvolvedor', 'Quase nunca muda'] },
+          { id: 'tracking', label: 'Ferramentas de acompanhamento', type: 'multi', options: ['Google Analytics', 'Pixel do Meta', 'Perfil da Empresa no Google', 'Nenhuma por enquanto'] },
+        ],
+      },
     ],
     deliverables: [
       'Estrutura de seções com textos (copy) sugeridos para cada uma',
       'Código responsivo, com foco em performance e SEO',
       'Chamadas para ação claras e integração com o canal de contato escolhido',
+      'Configuração de SEO local, domínio e ferramentas de acompanhamento',
     ],
   },
   {
@@ -184,11 +234,24 @@ export const categories: Category[] = [
           { id: 'mobileFeatures', label: 'Recursos do celular', type: 'multi', options: ['Notificações push', 'Câmera', 'Localização / GPS', 'Login com Google/Apple', 'Pagamento no app', 'Chat'] },
         ],
       },
+      {
+        id: 'mobile-business',
+        title: 'Negócio e publicação',
+        questions: [
+          { id: 'monetization', label: 'Como o app gera receita?', type: 'single', options: ['Gratuito (apoia o negócio)', 'Assinatura', 'Compras dentro do app', 'Anúncios', 'Uso interno da empresa'] },
+          { id: 'userAccounts', label: 'O usuário precisa criar conta?', type: 'single', options: ['Sim, obrigatório', 'Opcional', 'Não'] },
+          { id: 'adminPanel', label: 'Precisa de um painel web para gerenciar o app?', type: 'single', options: ['Sim', 'Não', 'Não sei'] },
+          { id: 'mobileIntegrations', label: 'Integrações', type: 'multi', options: ['WhatsApp', 'Pagamentos', 'Mapas', 'Redes sociais', 'Agenda do celular'] },
+          { id: 'storePublish', label: 'Publicação nas lojas (Google Play / App Store)', type: 'single', options: ['Tenho as contas de desenvolvedor', 'Preciso de ajuda para criar', 'Ainda não sei'] },
+          { id: 'appReferences', label: 'Apps que servem de referência', type: 'text', placeholder: 'Ex.: gosto da simplicidade do app X' },
+        ],
+      },
     ],
     deliverables: [
       'Escolha justificada de tecnologia (nativo ou multiplataforma)',
       'Mapa de navegação entre as telas',
       'Estrutura do projeto, componentes e gerenciamento de estado',
+      'Painel de gerenciamento, se necessário',
       'Passos para publicar nas lojas',
     ],
   },
@@ -214,12 +277,25 @@ export const categories: Category[] = [
           { id: 'educationFeatures', label: 'Recursos desejados', type: 'multi', options: ['Progresso do aluno', 'Quizzes / provas', 'Certificados', 'Comentários nas aulas', 'Gamificação', 'Painel do professor'] },
         ],
       },
+      {
+        id: 'education-business',
+        title: 'Vendas e comunidade',
+        questions: [
+          { id: 'studentsCount', label: 'Quantos alunos no primeiro ano?', type: 'single', options: ['Até 100', '100 a 1.000', 'Mais de 1.000'] },
+          { id: 'teachers', label: 'Quem ensina?', type: 'single', options: ['Só eu', 'Vários professores', 'Uma escola com equipe'] },
+          { id: 'eduPayments', label: 'Formas de pagamento', type: 'multi', options: ['Pix', 'Cartão de crédito', 'Parcelamento', 'Boleto', 'Não se aplica'] },
+          { id: 'community', label: 'Interação com os alunos', type: 'multi', options: ['Fórum / comentários', 'Grupo de WhatsApp ou Telegram', 'Aulas ao vivo', 'Mentoria individual'] },
+          { id: 'contentProtection', label: 'Proteger os vídeos contra cópia é importante?', type: 'single', options: ['Essencial', 'Desejável', 'Não importa'] },
+          { id: 'eduIntegrations', label: 'Integrações', type: 'multi', options: ['Zoom / Google Meet', 'YouTube / Vimeo', 'E-mail marketing', 'Emissão de certificados'] },
+        ],
+      },
     ],
     deliverables: [
       'Modelo de dados de cursos, módulos, aulas e matrículas',
       'Área do aluno com acompanhamento de progresso',
       'Painel para cadastro de conteúdo',
       'Estratégia de hospedagem e proteção dos vídeos/materiais',
+      'Fluxo de venda, matrícula e emissão de certificados',
     ],
   },
   {
@@ -245,12 +321,25 @@ export const categories: Category[] = [
           { id: 'schedulingFeatures', label: 'Funcionalidades desejadas', type: 'multi', options: ['Lembrete por WhatsApp/e-mail', 'Pagamento antecipado', 'Lista de espera', 'Prontuário / histórico do cliente', 'Integração com Google Agenda', 'Avaliação pós-atendimento'] },
         ],
       },
+      {
+        id: 'scheduling-ops',
+        title: 'Clientes e operação',
+        questions: [
+          { id: 'currentScheduling', label: 'Como os horários são marcados hoje?', type: 'single', options: ['WhatsApp', 'Telefone', 'Agenda de papel', 'Outro aplicativo', 'Chegada sem hora marcada'] },
+          { id: 'servicesList', label: 'Principais serviços, com duração e preço', type: 'textarea', placeholder: 'Ex.: corte 30 min R$ 45; barba 20 min R$ 30; corte + barba 50 min R$ 70' },
+          { id: 'bookingChannels', label: 'Por onde o cliente vai agendar?', type: 'multi', options: ['Site', 'Aplicativo', 'Link no WhatsApp', 'Link no Instagram', 'Recepção / balcão'] },
+          { id: 'clientData', label: 'O que guardar de cada cliente?', type: 'multi', options: ['Nome e telefone', 'Histórico de atendimentos', 'Preferências', 'Data de aniversário', 'Fotos de antes e depois'] },
+          { id: 'loyalty', label: 'Quer um programa de fidelidade?', type: 'single', options: ['Sim (ex.: 10º corte grátis)', 'Talvez depois', 'Não'] },
+          { id: 'reports', label: 'Relatórios desejados', type: 'multi', options: ['Faturamento por período', 'Serviços mais vendidos', 'Desempenho por profissional', 'Faltas e cancelamentos'] },
+        ],
+      },
     ],
     deliverables: [
       'Modelo de dados de profissionais, serviços, horários e agendamentos',
       'Lógica de disponibilidade que evite conflitos de horário',
       'Fluxo de agendamento para o cliente e painel para o negócio',
       'Estratégia de lembretes e notificações',
+      'Cadastro de clientes, fidelidade e relatórios do negócio',
     ],
   },
 ]

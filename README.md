@@ -20,6 +20,7 @@ npm run build    # gera a versão de produção em dist/
 - Preços e links de checkout da Cakto: `src/config/plans.ts`.
 - Login sem senha (Supabase) e liberação automática após o pagamento (webhook da Cakto).
 - Prospecção de comércios com Google Maps: escolha o nicho e o local, veja nota, avaliações, telefone e site.
+- Funil de contatos: salve comércios, mude a etapa, anote e marque o próximo contato.
 - **Passo a passo para configurar e publicar: [docs/CONFIGURACAO.md](docs/CONFIGURACAO.md).**
 
 ## Estrutura
@@ -39,6 +40,8 @@ src/
   App.tsx                 # controla a navegação entre as telas
 api/cakto-webhook.ts      # recebe os avisos de pagamento da Cakto (roda na Vercel)
 api/places-search.ts      # busca comércios no Google (só para quem tem acesso)
+api/places-details.ts     # dados atualizados dos comércios salvos no funil
+src/lib/crm.ts            # etapas do funil e gravação no Supabase (tabela saved_leads)
 server/cakto.ts           # decide liberar, manter ou remover o acesso
 supabase/schema.sql       # tabelas e regras de segurança do banco
 ```

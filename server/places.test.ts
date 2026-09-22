@@ -97,3 +97,61 @@ describe('POST /api/places-search', () => {
     fetchSpy.mockRestore()
   })
 })
+
+describe('detalhes dos comércios salvos', () => {
+  it('pede ao Google os mesmos campos da busca, sem o prefixo', async () => {
+    const { DETAILS_FIELD_MASK } = await import('./places')
+    expect(DETAILS_FIELD_MASK).toContain('displayName')
+    expect(DETAILS_FIELD_MASK).toContain('nationalPhoneNumber')
+    expect(DETAILS_FIELD_MASK).not.toContain('places.')
+    expect(DETAILS_FIELD_MASK).not.toContain('nextPageToken')
+  })
+
+  it('valida a lista de IDs', async () => {
+    const { parseDetailsInput } = await import('./places')
+    expect(parseDetailsInput({ ids: ['ChIJN1t_tDeuEmsRUsoyG83frY4', 'ChIJN1t_tDeuEmsRUsoyG83frY4'] })).toEqual([
+      'ChIJN1t_tDeuEmsRUsoyG83frY4',
+    ])
+    expect(parseDetailsInput({ ids: [] })).toBe('nenhum comércio informado')
+    expect(parseDetailsInput({ ids: ['../../admin'] })).toBe('identificador inválido')
+    expect(parseDetailsInput({ ids: Array.from({ length: 51 }, (_, i) => `ChIJ${'a'.repeat(10)}${i}`) })).toContain('no máximo')
+  })
+
+  it('devolve os comércios encontrados e avisa os que sumiram', async () => {
+    vi.resetModules()
+    process.env.GOOGLE_PLACES_API_KEY = 'google-key'
+    process.env.SUPABASE_URL = 'https://exemplo.supabase.co'
+    process.env.SUPABASE_SERVICE_ROLE_KEY = 'service'
+    vi.doMock('@supabase/supabase-js', () => ({
+      createClient: () => ({
+        auth: { getUser: async () => ({ data: { user: { email: 'a@b.com' } }, error: null }) },
+        from: () => ({
+          select: () => ({
+            eq: () => ({
+              maybeSingle: async () => ({
+                data: { email: 'a@b.com', plan: 'lifetime', status: 'active', expires_at: null, cakto_order_id: null },
+              }),
+            }),
+          }),
+        }),
+      }),
+    }))
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockImplementation(async (url) =>
+      String(url).includes('existe1234567')
+        ? Response.json({ id: 'existe1234567', displayName: { text: 'Barbearia' }, location: { latitude: -23.5, longitude: -46.6 } })
+        : new Response('not found', { status: 404 }),
+    )
+    const { POST } = await import('../api/places-details')
+    const res = await POST(
+      new Request('http://localhost/api/places-details', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ok' },
+        body: JSON.stringify({ ids: ['existe1234567', 'sumiu12345678'] }),
+      }),
+    )
+    const body = await res.json()
+    expect(body.places.map((p: { name: string }) => p.name)).toEqual(['Barbearia'])
+    expect(body.missing).toEqual(['sumiu12345678'])
+    fetchSpy.mockRestore()
+  })
+})

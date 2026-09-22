@@ -9,10 +9,12 @@ import CategorySelect from './screens/CategorySelect'
 import Questionnaire from './screens/Questionnaire'
 import Result from './screens/Result'
 import Prospect from './screens/Prospect'
+import Contacts from './screens/Contacts'
+import { useSavedLeads } from './crm/useSavedLeads'
 import type { Niche } from './data/niches'
-import { answersFromLead, type Lead } from './lib/leads'
+import { answersFromLead, type PlaceInfo } from './lib/leads'
 
-type Screen = 'landing' | 'prospect' | 'categories' | 'questionnaire' | 'result'
+type Screen = 'landing' | 'prospect' | 'contacts' | 'categories' | 'questionnaire' | 'result'
 
 // Link de retorno para usar na Cakto após a compra: https://SEU-SITE/#entrar
 const startsInApp = typeof window !== 'undefined' && window.location.hash === '#entrar'
@@ -25,6 +27,7 @@ export default function App() {
 
   const category = categoryId ? getCategory(categoryId) : undefined
   const canUse = state.status === 'active' || state.status === 'demo'
+  const crm = useSavedLeads(canUse)
   const email = state.status === 'active' || state.status === 'no-access' ? state.email : null
 
   useEffect(() => window.scrollTo(0, 0), [screen])
@@ -35,7 +38,7 @@ export default function App() {
     setScreen('questionnaire')
   }
 
-  function createFromLead(lead: Lead, niche: Niche) {
+  function createFromLead(lead: PlaceInfo, niche: Niche) {
     setCategoryId(niche.categoryId)
     setAnswers(answersFromLead(lead, niche))
     setScreen('questionnaire')
@@ -77,14 +80,23 @@ export default function App() {
           <button className={screen === 'prospect' ? 'active' : ''} onClick={() => setScreen('prospect')}>
             Prospectar clientes
           </button>
-          <button className={screen !== 'prospect' ? 'active' : ''} onClick={() => setScreen('categories')}>
+          <button className={screen === 'contacts' ? 'active' : ''} onClick={() => setScreen('contacts')}>
+            Meus contatos{crm.rows.length > 0 && <span className="tab-count">{crm.rows.length}</span>}
+          </button>
+          <button
+            className={screen !== 'prospect' && screen !== 'contacts' ? 'active' : ''}
+            onClick={() => setScreen('categories')}
+          >
             Criar projeto
           </button>
         </nav>
         {/* A prospecção continua montada (escondida) para não perder o mapa e a lista ao criar um projeto. */}
         <div hidden={screen !== 'prospect'}>
-          <Prospect onCreateProject={createFromLead} />
+          <Prospect crm={crm} onCreateProject={createFromLead} />
         </div>
+        {screen === 'contacts' && (
+          <Contacts crm={crm} onProspect={() => setScreen('prospect')} onCreateProject={createFromLead} />
+        )}
         {screen === 'categories' && <CategorySelect selectedId={categoryId} onSelect={chooseCategory} onBack={goHome} />}
         {screen === 'questionnaire' && category && (
           <Questionnaire

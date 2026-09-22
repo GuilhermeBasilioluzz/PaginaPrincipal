@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import MapView from '../components/MapView'
+import type { SavedLeadsApi } from '../crm/useSavedLeads'
+import { statuses, type LeadStatus } from '../lib/crm'
 import { capitals, customNiche, niches, type Niche } from '../data/niches'
 import { sortLeads, type LatLng, type Lead, type LeadFilters, type LeadSort } from '../lib/leads'
 import { geocode, mapsConfigured } from '../lib/maps'
@@ -15,6 +17,7 @@ const sortLabels: Record<LeadSort, string> = {
 }
 
 interface Props {
+  crm: SavedLeadsApi
   onCreateProject: (lead: Lead, niche: Niche) => void
 }
 
@@ -22,7 +25,7 @@ function formatRating(rating: number) {
   return rating.toLocaleString('pt-BR', { minimumFractionDigits: 1 })
 }
 
-export default function Prospect({ onCreateProject }: Props) {
+export default function Prospect({ crm, onCreateProject }: Props) {
   const [nicheId, setNicheId] = useState('barbearia')
   const [otherNiche, setOtherNiche] = useState('')
   const [place, setPlace] = useState('')
@@ -79,6 +82,7 @@ export default function Prospect({ onCreateProject }: Props) {
     setError('')
     try {
       const result = await searchLeads(params)
+      crm.seedPlaces(result.leads)
       setNextPageToken(result.nextPageToken)
       if (more) {
         setLeads((prev) => [...prev, ...result.leads.filter((l) => !prev.some((p) => p.id === l.id))])
@@ -275,15 +279,33 @@ export default function Prospect({ onCreateProject }: Props) {
                           </a>
                         )}
                       </div>
-                      <button
-                        className="btn btn-small btn-outline"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          onCreateProject(lead, searchedNiche)
-                        }}
-                      >
-                        Criar projeto para este comércio
-                      </button>
+                      <div className="lead-actions" onClick={(e) => e.stopPropagation()}>
+                        {crm.byPlaceId.get(lead.id) ? (
+                          <label className="saved-status">
+                            <span>No funil:</span>
+                            <select
+                              aria-label={`Etapa do funil de ${lead.name}`}
+                              value={crm.byPlaceId.get(lead.id)!.status}
+                              onChange={(e) =>
+                                crm.update(crm.byPlaceId.get(lead.id)!.id, { status: e.target.value as LeadStatus })
+                              }
+                            >
+                              {statuses.map((s) => (
+                                <option key={s.id} value={s.id}>
+                                  {s.label}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                        ) : (
+                          <button className="btn btn-small btn-primary" onClick={() => crm.save(lead, searchedNiche)}>
+                            Salvar no funil
+                          </button>
+                        )}
+                        <button className="btn btn-small btn-outline" onClick={() => onCreateProject(lead, searchedNiche)}>
+                          Criar projeto
+                        </button>
+                      </div>
                     </li>
                   ))}
                 </ol>

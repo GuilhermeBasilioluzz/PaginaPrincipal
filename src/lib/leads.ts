@@ -18,6 +18,9 @@ export interface Lead {
   distanceKm: number
 }
 
+/** Dados de um comércio vindos do Google, sem a distância (usado no funil de contatos). */
+export type PlaceInfo = Omit<Lead, 'distanceKm'>
+
 export interface LatLng {
   lat: number
   lng: number
@@ -56,7 +59,7 @@ export function sortLeads(leads: Lead[], sort: LeadSort, filters: LeadFilters): 
 }
 
 /** Respostas já preenchidas para criar o projeto de um comércio específico. */
-export function answersFromLead(lead: Lead, niche: Niche): Answers {
+export function answersFromLead(lead: PlaceInfo, niche: Niche): Answers {
   const reputation =
     lead.rating !== null ? `nota ${lead.rating.toLocaleString('pt-BR')} no Google (${lead.reviews} avaliações)` : 'sem avaliações no Google'
   const answers: Answers = {
@@ -69,4 +72,11 @@ export function answersFromLead(lead: Lead, niche: Niche): Answers {
   if (niche.categoryId === 'scheduling') answers.serviceType = niche.label
   if (niche.categoryId === 'landing') answers.business = `${niche.label}: ${lead.name}`
   return answers
+}
+
+/** Link de WhatsApp para celulares brasileiros; null para telefones fixos. */
+export function whatsappUrl(phone: string | null): string | null {
+  const digits = phone?.replace(/\D/g, '').replace(/^0+/, '').replace(/^55(?=\d{10,11}$)/, '') ?? ''
+  // Celular: DDD (2 dígitos) + 9 + 8 dígitos.
+  return /^\d{2}9\d{8}$/.test(digits) ? `https://wa.me/55${digits}` : null
 }

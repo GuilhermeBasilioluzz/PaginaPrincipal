@@ -30,6 +30,7 @@ export const lifetimePlan: Plan = {
   features: [
     'Acesso para sempre, sem mensalidade',
     'Prospecção de comércios em todo o Brasil',
+    'Funil para acompanhar cada contato',
     'Todas as categorias e questionários',
     'Projetos ilimitados',
     'Novas categorias e melhorias incluídas',
@@ -45,6 +46,7 @@ export const monthlyPlan: Plan = {
   cta: 'Assinar plano mensal',
   features: [
     'Prospecção de comércios em todo o Brasil',
+    'Funil para acompanhar cada contato',
     'Todas as categorias e questionários',
     'Projetos ilimitados',
     'Novas categorias e melhorias incluídas',

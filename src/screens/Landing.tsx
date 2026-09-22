@@ -152,6 +152,10 @@ export default function Landing({ onOpenGenerator }: { onOpenGenerator: () => vo
               <span>Nota alta e nenhum site: clientes satisfeitos e nenhuma presença digital própria.</span>
             </li>
             <li>
+              <b>Funil de contatos</b>
+              <span>Salve os comércios e acompanhe cada um: a contatar, interessado, proposta enviada, fechado.</span>
+            </li>
+            <li>
               <b>Um clique para o projeto</b>
               <span>O projeto do sistema já começa preenchido com os dados daquele comércio.</span>
             </li>
