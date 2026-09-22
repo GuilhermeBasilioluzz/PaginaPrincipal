@@ -19,6 +19,7 @@ npm run build    # gera a versão de produção em dist/
 
 - Preços e links de checkout da Cakto: `src/config/plans.ts`.
 - Login sem senha (Supabase) e liberação automática após o pagamento (webhook da Cakto).
+- Prospecção de comércios com Google Maps: escolha o nicho e o local, veja nota, avaliações, telefone e site.
 - **Passo a passo para configurar e publicar: [docs/CONFIGURACAO.md](docs/CONFIGURACAO.md).**
 
 ## Estrutura
@@ -29,12 +30,15 @@ src/
   data/types.ts           # tipos de pergunta, seção e categoria
   lib/generatePrompt.ts   # monta o prompt a partir das respostas
   config/plans.ts         # preços dos planos e links de checkout da Cakto
-  screens/                # Landing (página de vendas), CategorySelect, Questionnaire, Result
+  screens/                # Landing (vendas), Prospect (mapa), CategorySelect, Questionnaire, Result
+  data/niches.ts          # tipos de comércio para prospectar e o projeto sugerido para cada um
+  lib/leads.ts            # ordenação/filtros da lista e preenchimento do projeto a partir do comércio
   components/             # QuestionField (texto, texto longo, escolha única, múltipla)
   auth/useAccess.ts       # sessão do usuário e verificação do acesso pago
   lib/access.ts           # regra de quando o acesso está válido
   App.tsx                 # controla a navegação entre as telas
 api/cakto-webhook.ts      # recebe os avisos de pagamento da Cakto (roda na Vercel)
+api/places-search.ts      # busca comércios no Google (só para quem tem acesso)
 server/cakto.ts           # decide liberar, manter ou remover o acesso
 supabase/schema.sql       # tabelas e regras de segurança do banco
 ```

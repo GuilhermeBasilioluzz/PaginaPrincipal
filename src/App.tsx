@@ -8,15 +8,18 @@ import NoAccess from './screens/NoAccess'
 import CategorySelect from './screens/CategorySelect'
 import Questionnaire from './screens/Questionnaire'
 import Result from './screens/Result'
+import Prospect from './screens/Prospect'
+import type { Niche } from './data/niches'
+import { answersFromLead, type Lead } from './lib/leads'
 
-type Screen = 'landing' | 'categories' | 'questionnaire' | 'result'
+type Screen = 'landing' | 'prospect' | 'categories' | 'questionnaire' | 'result'
 
 // Link de retorno para usar na Cakto após a compra: https://SEU-SITE/#entrar
 const startsInApp = typeof window !== 'undefined' && window.location.hash === '#entrar'
 
 export default function App() {
   const { state, refresh, signOut } = useAccess()
-  const [screen, setScreen] = useState<Screen>(startsInApp ? 'categories' : 'landing')
+  const [screen, setScreen] = useState<Screen>(startsInApp ? 'prospect' : 'landing')
   const [categoryId, setCategoryId] = useState<string | null>(null)
   const [answers, setAnswers] = useState<Answers>({})
 
@@ -29,6 +32,12 @@ export default function App() {
   function chooseCategory(id: string) {
     if (id !== categoryId) setAnswers({})
     setCategoryId(id)
+    setScreen('questionnaire')
+  }
+
+  function createFromLead(lead: Lead, niche: Niche) {
+    setCategoryId(niche.categoryId)
+    setAnswers(answersFromLead(lead, niche))
     setScreen('questionnaire')
   }
 
@@ -64,6 +73,18 @@ export default function App() {
         {state.status === 'demo' && (
           <p className="demo-banner">Modo demonstração: o login e o pagamento estão desativados nesta prévia.</p>
         )}
+        <nav className="app-tabs" aria-label="Seções">
+          <button className={screen === 'prospect' ? 'active' : ''} onClick={() => setScreen('prospect')}>
+            Prospectar clientes
+          </button>
+          <button className={screen !== 'prospect' ? 'active' : ''} onClick={() => setScreen('categories')}>
+            Criar projeto
+          </button>
+        </nav>
+        {/* A prospecção continua montada (escondida) para não perder o mapa e a lista ao criar um projeto. */}
+        <div hidden={screen !== 'prospect'}>
+          <Prospect onCreateProject={createFromLead} />
+        </div>
         {screen === 'categories' && <CategorySelect selectedId={categoryId} onSelect={chooseCategory} onBack={goHome} />}
         {screen === 'questionnaire' && category && (
           <Questionnaire
@@ -91,8 +112,8 @@ export default function App() {
           <nav className="nav">
             {onLanding && (
               <>
+                <a href="#prospeccao">Prospecção</a>
                 <a href="#como-funciona">Como funciona</a>
-                <a href="#categorias">Categorias</a>
                 <a href="#precos">Preços</a>
               </>
             )}
@@ -107,8 +128,8 @@ export default function App() {
               </button>
             )}
             {onLanding && (
-              <button className="btn btn-small btn-outline" onClick={() => setScreen('categories')}>
-                {canUse ? 'Criar projeto' : 'Entrar'}
+              <button className="btn btn-small btn-outline" onClick={() => setScreen('prospect')}>
+                {canUse ? 'Abrir sistema' : 'Entrar'}
               </button>
             )}
           </nav>
@@ -116,7 +137,7 @@ export default function App() {
       </header>
 
       {onLanding ? (
-        <Landing onOpenGenerator={() => setScreen('categories')} />
+        <Landing onOpenGenerator={() => setScreen('prospect')} />
       ) : (
         <main className="wrap generator">{renderApp()}</main>
       )}

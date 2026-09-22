@@ -35,6 +35,10 @@ const faq = [
     a: 'Um projeto técnico completo do seu sistema, em texto. Com ele você constrói usando as ferramentas de criação com inteligência artificial que preferir, ou entrega a um desenvolvedor: fica claro exatamente o que precisa ser feito.',
   },
   {
+    q: 'De onde vêm os dados dos comércios?',
+    a: 'Do Google Maps, em tempo real: nome, endereço, nota, número de avaliações, telefone e site que o próprio comércio publicou.',
+  },
+  {
     q: 'O que significa acesso vitalício?',
     a: 'Você paga uma única vez e usa o sistema sem mensalidade, incluindo as novas categorias e melhorias.',
   },
@@ -70,14 +74,14 @@ export default function Landing({ onOpenGenerator }: { onOpenGenerator: () => vo
       <section className="hero">
         <div className="wrap hero-grid">
           <div className="hero-copy">
-            <p className="eyebrow">Para quem quer criar o próprio sistema</p>
+            <p className="eyebrow">Para quem cria sistemas para comércios locais</p>
             <h1>
               Sua ideia de sistema, <mark>pronta para ser construída</mark>.
             </h1>
             <p className="hero-lead">
-              Conte com as suas palavras o que você quer criar. O PromptForge faz as perguntas que um especialista
-              faria e transforma a sua ideia em um projeto completo, com funcionalidades, regras e etapas de construção.
-              Você sai com o caminho claro para lançar a sua loja, app ou plataforma.
+              Encontre no mapa os comércios de qualquer cidade do Brasil, escolha para quem vender e transforme a ideia
+              em um projeto completo, com funcionalidades, regras e etapas de construção. Da prospecção ao projeto, no
+              mesmo lugar.
             </p>
             <div className="hero-actions">
               <a className="btn btn-primary" href="#precos">
@@ -127,6 +131,58 @@ export default function Landing({ onOpenGenerator }: { onOpenGenerator: () => vo
               </li>
             ))}
           </ol>
+        </div>
+      </section>
+
+      <section className="wrap section prospect-pitch" id="prospeccao">
+        <div className="pitch-copy">
+          <p className="eyebrow">Prospecção com Google Maps</p>
+          <h2 className="section-title">Escolha a cidade. Veja quem está esperando por um sistema.</h2>
+          <p className="section-lead">
+            Selecione o tipo de comércio, clique em qualquer ponto do Brasil e veja os negócios da região com nota,
+            número de avaliações, telefone e site. Ordene pelas maiores ou menores notas e filtre quem ainda não tem site.
+          </p>
+          <ul className="pitch-points">
+            <li>
+              <b>Qualquer lugar do Brasil</b>
+              <span>Capitais, cidades do interior ou um bairro específico, com raio de 1 a 20 km.</span>
+            </li>
+            <li>
+              <b>Os melhores alvos primeiro</b>
+              <span>Nota alta e nenhum site: clientes satisfeitos e nenhuma presença digital própria.</span>
+            </li>
+            <li>
+              <b>Um clique para o projeto</b>
+              <span>O projeto do sistema já começa preenchido com os dados daquele comércio.</span>
+            </li>
+          </ul>
+        </div>
+        <div className="pitch-visual" aria-label="Ilustração da tela de prospecção com resultados de exemplo">
+          <div className="pitch-map" aria-hidden>
+            <span className="pitch-ring" />
+            <span className="map-pin" style={{ left: '38%', top: '34%' }}>4,9</span>
+            <span className="map-pin active" style={{ left: '56%', top: '48%' }}>4,7</span>
+            <span className="map-pin" style={{ left: '44%', top: '62%' }}>4,2</span>
+            <span className="map-pin" style={{ left: '63%', top: '30%' }}>3,8</span>
+          </div>
+          <ol className="pitch-list">
+            {[
+              { name: 'Barbearia Exemplo 1', rating: '4,9', reviews: 312, hot: true },
+              { name: 'Barbearia Exemplo 2', rating: '4,7', reviews: 158, hot: false },
+              { name: 'Barbearia Exemplo 3', rating: '4,2', reviews: 87, hot: true },
+            ].map((l) => (
+              <li key={l.name}>
+                <span>
+                  <b>{l.name}</b>
+                  {l.hot && <span className="tag tag-hot">Sem site</span>}
+                </span>
+                <span className="lead-rating">
+                  <b>{l.rating}</b> ★ <span>({l.reviews})</span>
+                </span>
+              </li>
+            ))}
+          </ol>
+          <p className="pitch-caption">Ilustração com dados de exemplo</p>
         </div>
       </section>
 

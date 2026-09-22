@@ -29,6 +29,7 @@ export const lifetimePlan: Plan = {
   cta: 'Garantir acesso vitalício',
   features: [
     'Acesso para sempre, sem mensalidade',
+    'Prospecção de comércios em todo o Brasil',
     'Todas as categorias e questionários',
     'Projetos ilimitados',
     'Novas categorias e melhorias incluídas',
@@ -43,6 +44,7 @@ export const monthlyPlan: Plan = {
   checkoutUrl: 'https://pay.cakto.com.br/pehqx45_1129830',
   cta: 'Assinar plano mensal',
   features: [
+    'Prospecção de comércios em todo o Brasil',
     'Todas as categorias e questionários',
     'Projetos ilimitados',
     'Novas categorias e melhorias incluídas',

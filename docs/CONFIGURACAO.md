@@ -1,4 +1,4 @@
-# Configuração: login, pagamento e liberação de acesso
+# Configuração: login, pagamento, liberação de acesso e Google Maps
 
 Como funciona:
 
@@ -47,6 +47,9 @@ Quem tem o vitalício nunca perde o acesso por causa de um evento do plano mensa
    | `CAKTO_WEBHOOK_SECRET` | chave secreta do webhook da Cakto (passo 3) |
    | `CAKTO_LIFETIME_IDS` | `ubgv3n5` |
    | `CAKTO_MONTHLY_IDS` | `pehqx45` |
+   | `VITE_GOOGLE_MAPS_API_KEY` | chave do navegador (passo 4) |
+   | `VITE_GOOGLE_MAPS_MAP_ID` | opcional (passo 4) |
+   | `GOOGLE_PLACES_API_KEY` | chave do servidor (**secreta**, passo 4) |
 
 3. Clique em **Deploy**. Anote o endereço do site.
 
@@ -61,7 +64,41 @@ Quem tem o vitalício nunca perde o acesso por causa de um evento do plano mensa
 3. Nos dois produtos, configure a **página de obrigado / redirecionamento** para `https://SEU-SITE/#entrar`,
    assim o cliente cai direto na tela de login depois de pagar.
 
-## 4. Testar
+## 4. Google Maps (prospecção de comércios)
+
+A prospecção usa três serviços do Google Maps Platform. Eles são **pagos por uso**, com uma cota
+gratuita mensal. Confira os preços atuais em
+[mapsplatform.google.com/pricing](https://mapsplatform.google.com/pricing/) e **configure limites**
+para não ter surpresas.
+
+1. Entre em [console.cloud.google.com](https://console.cloud.google.com), crie um projeto e ative o faturamento.
+2. Em **APIs e serviços → Biblioteca**, ative:
+   - **Maps JavaScript API** (o mapa)
+   - **Geocoding API** (buscar cidade ou bairro)
+   - **Places API (New)** (a lista de comércios)
+3. Em **APIs e serviços → Credenciais**, crie **duas** chaves de API:
+
+   | Chave | Restrição de aplicativo | Restrição de API | Variável na Vercel |
+   |---|---|---|---|
+   | Navegador | Sites: `https://SEU-SITE/*` | Maps JavaScript API, Geocoding API | `VITE_GOOGLE_MAPS_API_KEY` |
+   | Servidor | Nenhuma | Places API (New) | `GOOGLE_PLACES_API_KEY` (**secreta**) |
+
+4. (Opcional) Em **Google Maps Platform → Map Management**, crie um *Map ID* do tipo JavaScript e
+   cadastre em `VITE_GOOGLE_MAPS_MAP_ID`. Sem ele, o site usa o mapa de demonstração do Google.
+5. **Controle de gastos**: em **Faturamento → Orçamentos e alertas**, crie um alerta de valor mensal.
+   Em **APIs e serviços → Places API (New) → Cotas**, limite as buscas por dia.
+6. Faça um novo deploy na Vercel depois de cadastrar as chaves.
+
+Como funciona por dentro: o mapa roda no navegador, mas a busca de comércios passa pelo servidor
+(`/api/places-search`), que só responde para quem está logado **e com acesso pago**. Assim ninguém
+gasta a sua cota do Google sem ter comprado.
+
+Cada busca traz até 20 comércios; "Carregar mais" busca a próxima página (até 60 no total, limite do Google).
+
+> Regras do Google: os dados dos comércios podem ser exibidos, mas não copiados para uma base própria
+> (a exceção é o ID do lugar). Por isso a lista não tem exportação para planilha.
+
+## 5. Testar
 
 1. Na Cakto, use o botão de **enviar evento de teste** do webhook (ou faça uma compra real e reembolse).
 2. No Supabase, abra **Table Editor → webhook_events**: cada aviso recebido aparece ali com o resultado

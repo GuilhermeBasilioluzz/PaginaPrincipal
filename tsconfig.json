@@ -17,7 +17,8 @@
     "isolatedModules": true,
     "types": [
       "vite/client",
-      "node"
+      "node",
+      "google.maps"
     ]
   },
   "include": [
