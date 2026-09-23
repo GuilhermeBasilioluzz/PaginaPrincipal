@@ -4,6 +4,8 @@ import { getCategory } from './data/categories'
 import { configProblems } from './lib/supabase'
 import type { Answers } from './data/types'
 import Landing from './screens/Landing'
+import Terms from './legal/Terms'
+import Privacy from './legal/Privacy'
 import Login from './screens/Login'
 import NoAccess from './screens/NoAccess'
 import CategorySelect from './screens/CategorySelect'
@@ -15,14 +17,20 @@ import { useSavedLeads } from './crm/useSavedLeads'
 import type { Niche } from './data/niches'
 import { answersFromLead, type PlaceInfo } from './lib/leads'
 
-type Screen = 'landing' | 'prospect' | 'contacts' | 'categories' | 'questionnaire' | 'result'
+type Screen = 'landing' | 'prospect' | 'contacts' | 'categories' | 'questionnaire' | 'result' | 'terms' | 'privacy'
+export type LegalPage = 'terms' | 'privacy'
+
+/** Endereços diretos das páginas legais: /#termos e /#privacidade. */
+const legalHash: Record<LegalPage, string> = { terms: '#termos', privacy: '#privacidade' }
 
 // Link de retorno para usar na Cakto após a compra: https://SEU-SITE/#entrar
-const startsInApp = typeof window !== 'undefined' && window.location.hash === '#entrar'
+const initialHash = typeof window !== 'undefined' ? window.location.hash : ''
+const startsInApp = initialHash === '#entrar'
+const startsOnLegal = (Object.keys(legalHash) as LegalPage[]).find((k) => legalHash[k] === initialHash)
 
 export default function App() {
   const { state, refresh, signOut } = useAccess()
-  const [screen, setScreen] = useState<Screen>(startsInApp ? 'prospect' : 'landing')
+  const [screen, setScreen] = useState<Screen>(startsOnLegal ?? (startsInApp ? 'prospect' : 'landing'))
   const [categoryId, setCategoryId] = useState<string | null>(null)
   const [answers, setAnswers] = useState<Answers>({})
 
@@ -31,7 +39,8 @@ export default function App() {
   const crm = useSavedLeads(canUse)
   const email = state.status === 'active' || state.status === 'no-access' ? state.email : null
 
-  useEffect(() => window.scrollTo(0, 0), [screen])
+  // 'instant' ignora a rolagem suave da página, para cada tela começar sempre do topo.
+  useEffect(() => window.scrollTo({ top: 0, behavior: 'instant' }), [screen])
 
   function chooseCategory(id: string) {
     if (id !== categoryId) setAnswers({})
@@ -45,7 +54,13 @@ export default function App() {
     setScreen('questionnaire')
   }
 
+  function openLegal(page: LegalPage) {
+    history.replaceState(null, '', legalHash[page])
+    setScreen(page)
+  }
+
   function goHome() {
+    if (window.location.hash) history.replaceState(null, '', window.location.pathname)
     setScreen('landing')
   }
 
@@ -80,7 +95,7 @@ export default function App() {
           </div>
         )
       case 'signed-out':
-        return <Login onBack={goHome} />
+        return <Login onBack={goHome} onOpenLegal={openLegal} />
       case 'no-access':
         return <NoAccess email={state.email} access={state.access} onRefresh={refresh} onSignOut={signOut} />
     }
@@ -162,7 +177,20 @@ export default function App() {
       </header>
 
       {onLanding ? (
-        <Landing onOpenGenerator={() => setScreen('prospect')} />
+        <Landing onOpenGenerator={() => setScreen('prospect')} onOpenLegal={openLegal} />
+      ) : screen === 'terms' || screen === 'privacy' ? (
+        <main className="wrap legal">
+          <button className="link" onClick={goHome}>
+            ← Página inicial
+          </button>
+          {screen === 'terms' ? <Terms /> : <Privacy />}
+          <p className="muted small">
+            Veja também:{' '}
+            <button className="link" onClick={() => openLegal(screen === 'terms' ? 'privacy' : 'terms')}>
+              {screen === 'terms' ? 'Política de Privacidade' : 'Termos de Uso'}
+            </button>
+          </p>
+        </main>
       ) : (
         <main className="wrap generator">{renderApp()}</main>
       )}

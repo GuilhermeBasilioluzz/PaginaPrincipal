@@ -151,3 +151,11 @@ npm run dev                  # site em http://localhost:5173 (o webhook só roda
 ```
 
 Para testar o gerador sem login, use `VITE_DEMO_MODE=true` no `.env.local`.
+
+## Antes da primeira venda
+
+- Preencha `src/config/company.ts` (nome ou razão social, CPF/CNPJ e e-mail de contato). Esses dados aparecem
+  nos Termos de Uso (`/#termos`) e na Política de Privacidade (`/#privacidade`).
+- Configure um serviço de e-mail próprio no Supabase (Authentication → Emails → SMTP Settings). O envio padrão
+  do Supabase é só para testes e tem limite baixo por hora.
+- Plano de hospedagem que permita uso comercial (Vercel Pro ou outra hospedagem).

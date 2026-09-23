@@ -57,6 +57,23 @@ describe('POST /api/cakto-webhook', () => {
     expect(JSON.stringify(db.events)).not.toContain('segredo-teste')
   })
 
+  it('não guarda nome, CPF nem telefone do comprador no registro', async () => {
+    await send({
+      secret: 'segredo-teste',
+      event: 'purchase_approved',
+      data: {
+        id: 'pedido2',
+        customer: { email: 'c@d.com', name: 'Fulano de Tal', docNumber: '123.456.789-00', phone: '11999990000' },
+        offer: { id: 'ubgv3n5' },
+      },
+    })
+    const saved = JSON.stringify(db.events)
+    expect(saved).toContain('c@d.com')
+    expect(saved).not.toContain('Fulano')
+    expect(saved).not.toContain('123.456.789-00')
+    expect(saved).not.toContain('11999990000')
+  })
+
   it('remove o acesso após reembolso', async () => {
     const base = { secret: 'segredo-teste', data: { customer: { email: 'a@b.com' }, offer: { id: 'pehqx45_1129830' } } }
     await send({ ...base, event: 'purchase_approved' })

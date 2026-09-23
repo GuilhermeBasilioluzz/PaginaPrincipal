@@ -18,6 +18,26 @@ export interface CaktoWebhook {
   }
 }
 
+/**
+ * Versão mínima do aviso para guardar no registro (LGPD: só o necessário).
+ * Fica de fora tudo o que identifica o comprador além do e-mail (nome, CPF, telefone, endereço)
+ * e a chave secreta.
+ */
+export function minimalPayload(payload: CaktoWebhook) {
+  const d = payload.data ?? {}
+  return {
+    event: payload.event ?? null,
+    data: {
+      id: d.id ?? null,
+      refId: d.refId ?? null,
+      status: d.status ?? null,
+      customer: { email: d.customer?.email ?? null },
+      product: d.product ? { id: d.product.id, short_id: d.product.short_id, name: d.product.name, type: d.product.type } : null,
+      offer: d.offer ? { id: d.offer.id, name: d.offer.name } : null,
+    },
+  }
+}
+
 export interface PlanIds {
   lifetime: string[]
   monthly: string[]
