@@ -15,6 +15,12 @@ npm test         # roda os testes
 npm run build    # gera a versão de produção em dist/
 ```
 
+## Termos de Uso e Privacidade
+
+As páginas ficam em `/#termos` e `/#privacidade` (textos em `src/legal/`).
+**Antes de vender, preencha seus dados em `src/config/company.ts`** (nome ou razão social, CPF/CNPJ e e-mail de contato).
+Recomenda-se revisão por um advogado.
+
 ## Planos, login e pagamento
 
 - Preços e links de checkout da Cakto: `src/config/plans.ts`.

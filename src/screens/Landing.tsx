@@ -80,7 +80,12 @@ function PromptLine({ line }: { line: string }) {
   return <span>{parts.map((part, i) => (i % 2 ? <b key={i}>{part}</b> : part))}</span>
 }
 
-export default function Landing({ onOpenGenerator }: { onOpenGenerator: () => void }) {
+interface LandingProps {
+  onOpenGenerator: () => void
+  onOpenLegal: (page: 'terms' | 'privacy') => void
+}
+
+export default function Landing({ onOpenGenerator, onOpenLegal }: LandingProps) {
   const monthsToPayOff = (lifetimePlan.price / monthlyPlan.price).toLocaleString('pt-BR', { maximumFractionDigits: 1 })
   const breakEvenMonth = Math.ceil(lifetimePlan.price / monthlyPlan.price)
 
@@ -255,7 +260,17 @@ export default function Landing({ onOpenGenerator }: { onOpenGenerator: () => vo
             <PlanCard plan={lifetimePlan} featured />
             <PlanCard plan={monthlyPlan} />
           </div>
-          <p className="pay-note">Pagamento processado com segurança pela Cakto. 7 dias de garantia.</p>
+          <p className="pay-note">
+            Pagamento processado com segurança pela Cakto. 7 dias de garantia. Ao comprar, você concorda com os{' '}
+            <button className="link" onClick={() => onOpenLegal('terms')}>
+              Termos de Uso
+            </button>{' '}
+            e a{' '}
+            <button className="link" onClick={() => onOpenLegal('privacy')}>
+              Política de Privacidade
+            </button>
+            .
+          </p>
         </div>
       </section>
 
@@ -276,6 +291,14 @@ export default function Landing({ onOpenGenerator }: { onOpenGenerator: () => vo
           <span className="logo">
             Prompt<span>Forge</span>
           </span>
+          <nav className="footer-links" aria-label="Documentos">
+            <button className="link" onClick={() => onOpenLegal('terms')}>
+              Termos de Uso
+            </button>
+            <button className="link" onClick={() => onOpenLegal('privacy')}>
+              Política de Privacidade
+            </button>
+          </nav>
           <span className="muted">© {new Date().getFullYear()} PromptForge</span>
         </div>
       </footer>

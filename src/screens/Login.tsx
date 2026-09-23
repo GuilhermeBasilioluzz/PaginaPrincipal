@@ -2,7 +2,13 @@ import { useState, type FormEvent } from 'react'
 import { explainSendError } from '../lib/authErrors'
 import { supabase } from '../lib/supabase'
 
-export default function Login({ onBack }: { onBack: () => void }) {
+export default function Login({
+  onBack,
+  onOpenLegal,
+}: {
+  onBack: () => void
+  onOpenLegal: (page: 'terms' | 'privacy') => void
+}) {
   const [email, setEmail] = useState('')
   const [code, setCode] = useState('')
   const [sent, setSent] = useState(false)
@@ -70,6 +76,17 @@ export default function Login({ onBack }: { onBack: () => void }) {
             <button className="btn btn-primary btn-block" disabled={busy}>
               {busy ? 'Enviando…' : 'Receber acesso por e-mail'}
             </button>
+            <p className="muted small">
+              Ao entrar, você concorda com os{' '}
+              <button type="button" className="link" onClick={() => onOpenLegal('terms')}>
+                Termos de Uso
+              </button>{' '}
+              e a{' '}
+              <button type="button" className="link" onClick={() => onOpenLegal('privacy')}>
+                Política de Privacidade
+              </button>
+              .
+            </p>
           </form>
         ) : (
           <form className="form" onSubmit={verifyCode}>

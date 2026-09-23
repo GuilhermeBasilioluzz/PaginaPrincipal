@@ -1,7 +1,7 @@
 import { timingSafeEqual } from 'node:crypto'
 import { createClient } from '@supabase/supabase-js'
 import type { AccessRow } from '../src/lib/access.js'
-import { decideAccess, parseIds, resolvePlan, type CaktoWebhook } from '../server/cakto.js'
+import { decideAccess, minimalPayload, parseIds, resolvePlan, type CaktoWebhook } from '../server/cakto.js'
 import { normalizeSupabaseUrl } from '../src/lib/config.js'
 
 /**
@@ -43,8 +43,8 @@ export async function POST(request: Request): Promise<Response> {
   const orderId = payload.data?.refId ?? payload.data?.id ?? null
 
   const db = createClient(normalizeSupabaseUrl(SUPABASE_URL), SUPABASE_SERVICE_ROLE_KEY.trim(), { auth: { persistSession: false } })
-  // Nunca guardamos a chave secreta no registro.
-  const { secret: _secret, ...logged } = payload
+  // Guarda só o necessário para conferência: sem a chave secreta e sem dados pessoais além do e-mail.
+  const logged = minimalPayload(payload)
   const log = (result: string) =>
     db.from('webhook_events').insert({ event, email, order_id: orderId, result, payload: logged })
 
