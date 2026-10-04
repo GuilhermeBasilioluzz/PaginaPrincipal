@@ -19,9 +19,11 @@ export default async function StoreLayout({ children, params }: {
           <h1 className="store-name">{store.name}</h1>
           <p className="muted small">{ROLE_LABEL[role]} · /{store.slug}</p>
         </div>
-        <nav className="subnav" aria-label="Loja">
+        <nav className="subnav wrap" aria-label="Loja">
           <Link href={`/app/${slug}`}>Painel</Link>
           <Link href={`/app/${slug}/produtos`}>Produtos</Link>
+          <Link href={`/app/${slug}/colecoes`}>Coleções</Link>
+          <Link href={`/app/${slug}/categorias`}>Categorias</Link>
           <Link href={`/app/${slug}/equipe`}>Equipe</Link>
         </nav>
       </div>

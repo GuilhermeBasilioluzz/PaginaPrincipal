@@ -77,5 +77,22 @@
 - Criar produto agora abre a tela de edição, já com o envio de fotos. Lista mostra a miniatura da foto principal.
 - Duplicar produto ainda não copia fotos (decisão: evitar duas linhas apontando para o mesmo arquivo).
 
+## Decisões (ETAPA 6)
+- **Categorias:** 2 níveis (categoria > subcategoria), garantido por gatilho. Excluir não apaga produtos (ficam sem
+  categoria); subcategorias viram principais. Endereço (slug) único por loja e fixo.
+- **Coleções** são contextos, não categorias: uma peça pode estar em várias. Dois tipos:
+  `manual` (a equipe escolhe) e `new_arrivals` (**automática**, por dias desde a publicação). Rascunho/publicada.
+- **`collection_items()` é a fonte única do conteúdo de uma coleção**: o painel e o futuro catálogo público usam a mesma
+  função; para o público o RLS esconde coleção em rascunho e peça fora do catálogo.
+- **Loja nova nasce só com "Novidades" (automática, 7 dias).** As demais coleções virão da equipe e, a partir da ETAPA 12,
+  das **pré-seleções de Stories** (ver `docs/INSTAGRAM.md`).
+- **Permissões:** categorias e coleções (criar/editar/excluir): dono e gerente. Atendente organiza peças dentro das coleções.
+- Produto ↔ coleções: marcação na tela do produto (atômica) e escolha de várias peças na tela da coleção.
+
+## Direção do produto: Story → pré-seleção → coleção permanente
+Stories somem em 24 h; o catálogo não. A loja posta no Instagram, o Hyperion recolhe o Story numa caixa de pré-seleção
+("Stories recebidos"), a equipe confirma (semiautomático) e o conteúdo vira produtos/coleção que permanecem.
+Entrada manual (print/foto do Story) e conexão oficial com a Meta alimentam a mesma caixa. Detalhes: `docs/INSTAGRAM.md`.
+
 ## Próximo
-ETAPA 6: categorias e coleções (CRUD, associar produtos, página da coleção).
+ETAPA 7: estoque (quantidade, esgotado automático, movimentações, reservado).
