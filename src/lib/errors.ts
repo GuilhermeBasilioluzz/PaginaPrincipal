@@ -36,12 +36,19 @@ export function dbErrorMessage(error: SupabaseLikeError): string {
     return 'Não encontramos uma conta com este e-mail. Peça para a pessoa criar uma conta no Hyperion primeiro.'
   }
   if (message.includes('already_member')) return 'Esta pessoa já faz parte da equipe.'
+  if (message.includes('products_sku_uidx')) return 'Já existe um produto com este código (SKU) nesta loja.'
+  if (message.includes('not_found')) return 'Este produto não existe mais ou você não tem acesso a ele.'
   if (message.includes('ao menos um dono')) return 'A loja precisa ter pelo menos um dono.'
   switch (error.code) {
     case '23505':
       return message.includes('slug') ? 'Este endereço de loja já está em uso. Escolha outro.' : 'Este registro já existe.'
     case '23514':
       return 'Algum dado não é válido. Confira os campos e tente de novo.'
+    case '22P02':
+    case '22003':
+      return 'Algum valor está fora do permitido. Confira preço e quantidade.'
+    case '23503':
+      return 'Categoria ou coleção inválida para esta loja.'
     case '42501':
       return 'Você não tem permissão para fazer isso.'
     case '28000':

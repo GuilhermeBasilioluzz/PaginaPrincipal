@@ -105,6 +105,11 @@ describe('mensagens de erro', () => {
     expect(authErrorMessage({ code: 'invalid_credentials', message: 'Invalid login credentials' })).toBe('E-mail ou senha incorretos.')
     expect(authErrorMessage({ code: 'xyz', message: 'secret stack' })).not.toContain('secret')
   })
+  it('traduz erros de produto', () => {
+    expect(dbErrorMessage({ code: '23505', message: 'duplicate key value violates unique constraint "products_sku_uidx"' })).toContain('SKU')
+    expect(dbErrorMessage({ code: 'P0002', message: 'not_found' })).toContain('não existe')
+    expect(dbErrorMessage({ code: '23503', message: 'x' })).toContain('Categoria')
+  })
   it('traduz erros do banco', () => {
     expect(dbErrorMessage({ message: 'user_not_found', code: 'P0002' })).toContain('criar uma conta')
     expect(dbErrorMessage({ message: 'already_member', code: '23505' })).toContain('já faz parte')

@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import {
   STATUS_LABEL, activityVerb, isEmptyStore, statusSegments, timeAgo, type Dashboard,
 } from '@/lib/dashboard'
@@ -24,7 +25,7 @@ function SoonTile({ label, stage }: { label: string; stage: string }) {
   )
 }
 
-export function DashboardView({ data, canEdit, now }: { data: Dashboard; canEdit: boolean; now?: Date }) {
+export function DashboardView({ data, canEdit, now, newProductHref }: { data: Dashboard; canEdit: boolean; now?: Date; newProductHref: string }) {
   const { products: p } = data
 
   if (isEmptyStore(data)) {
@@ -34,12 +35,7 @@ export function DashboardView({ data, canEdit, now }: { data: Dashboard; canEdit
         <p className="muted">
           Quando você adicionar a primeira peça, este painel mostra o que está disponível, reservado e vendido.
         </p>
-        {canEdit && (
-          <button type="button" className="btn btn-primary" disabled title="Disponível na próxima etapa">
-            Adicionar produto
-          </button>
-        )}
-        {canEdit && <p className="small muted">O cadastro de produtos chega na próxima etapa.</p>}
+        {canEdit && <Link href={newProductHref} className="btn btn-primary">Adicionar produto</Link>}
       </div>
     )
   }

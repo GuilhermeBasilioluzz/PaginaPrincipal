@@ -50,5 +50,19 @@
 - **Total de produtos não conta arquivados**; "Poucas unidades"/"Esgotados" só consideram produtos disponíveis ou reservados.
 - **Atenção p/ ETAPA 4/7:** produto novo nasce com estoque 0 (conta como esgotado). O cadastro precisa pedir a quantidade.
 
+## Decisões (ETAPA 4)
+- **Gravação atômica:** `save_product()` cria/atualiza o produto E o estoque numa transação (SECURITY INVOKER: RLS
+  e GRANTs por coluna continuam valendo). Se o estoque falha, nada fica pela metade.
+- **Endereço do produto (slug)** é gerado do nome, único por loja (`-2`, `-3`) e **não muda ao renomear**
+  (links já compartilhados continuam valendo).
+- **Duplicar** (`duplicate_product()`): copia o modelo e as coleções; a cópia nasce **indisponível** (fora do catálogo),
+  sem estoque e sem SKU, para ninguém publicar por engano. Fotos não são copiadas (ETAPA 5).
+- **Arquivar** guarda o histórico (some do catálogo); **excluir** só dono/gerente, com confirmação. Restaurar volta
+  como indisponível.
+- **Formulário em dois níveis:** essencial (nome, preço, estoque, tamanhos, cor, situação) + "Mais opções".
+  Preço aceita vírgula ("189,90", "R$ 1.234,56"). Tamanhos: PP–XG, Único, 34–46 e campo livre.
+- **Lista:** busca por nome/SKU (texto sanitizado), filtro por situação, 20 por página.
+- **Ainda não faz:** fotos (ETAPA 5), categorias/coleções CRUD (6), regras automáticas de esgotado (7).
+
 ## Próximo
-ETAPA 4: produtos (CRUD).
+ETAPA 5: imagens (upload e galeria).

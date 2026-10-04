@@ -18,5 +18,5 @@ export default async function StoreHome({ params }: { params: Promise<{ store: s
   if (error) {
     return <p className="notice notice-error" role="alert">Não foi possível carregar o painel agora. Atualize a página.</p>
   }
-  return <DashboardView data={parseDashboard(data)} canEdit={can(membership.role, 'edit_products') && membership.store.is_active} />
+  return <DashboardView data={parseDashboard(data)} canEdit={can(membership.role, 'edit_products') && membership.store.is_active} newProductHref={`/app/${slug}/produtos/novo`} />
 }
