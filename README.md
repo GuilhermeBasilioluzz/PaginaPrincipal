@@ -1,66 +1,20 @@
-# PromptForge
+# Hyperion System
 
-Plataforma web que transforma uma descrição simples de um sistema em um prompt completo e específico para IA.
+SaaS multi-loja que transforma os Stories do Instagram de lojas de roupas num catálogo digital
+permanente, organizado, pesquisável e ligado ao estoque.
 
-Veja o escopo em [docs/MVP.md](docs/MVP.md).
+> "Seus Stories duram 24 horas. Seu catálogo, não."
 
-## Como rodar
+Status: **ETAPA 1 (banco multi-loja) concluída**. Veja [docs/ARQUITETURA.md](docs/ARQUITETURA.md).
+O projeto anterior (PromptForge) foi removido deste repositório; continua no histórico do git.
 
-Requisitos: [Node.js](https://nodejs.org) 20 ou superior.
+## Testar o banco
+
+Requer PostgreSQL 15+ instalado (sem Docker nem Supabase):
 
 ```bash
-npm install      # instala as dependências (só na primeira vez)
-npm run dev      # abre o servidor de desenvolvimento em http://localhost:5173
-npm test         # roda os testes
-npm run build    # gera a versão de produção em dist/
+scripts/test-db.sh
 ```
 
-## Termos de Uso e Privacidade
-
-As páginas ficam em `/#termos` e `/#privacidade` (textos em `src/legal/`).
-**Antes de vender, preencha seus dados em `src/config/company.ts`** (nome ou razão social, CPF/CNPJ e e-mail de contato).
-Recomenda-se revisão por um advogado.
-
-## Planos, login e pagamento
-
-- Preços e links de checkout da Cakto: `src/config/plans.ts`.
-- Login sem senha (Supabase) e liberação automática após o pagamento (webhook da Cakto).
-- Prospecção de comércios no mapa: escolha o nicho e o local e veja os negócios da região.
-  Grátis com OpenStreetMap (padrão) ou, com as chaves do Google, com nota e avaliações do Google Maps.
-- Funil de contatos: salve comércios, mude a etapa, anote e marque o próximo contato.
-- Mensagens de abordagem prontas (primeiro contato, retomar conversa, proposta), personalizadas
-  pela nota, avaliações e presença de site do comércio, com envio direto pelo WhatsApp.
-- **Passo a passo para configurar e publicar: [docs/CONFIGURACAO.md](docs/CONFIGURACAO.md).**
-
-## Estrutura
-
-```
-src/
-  data/categories.ts      # categorias e questionários (edite aqui para adicionar perguntas)
-  data/types.ts           # tipos de pergunta, seção e categoria
-  lib/generatePrompt.ts   # monta o prompt a partir das respostas
-  config/plans.ts         # preços dos planos e links de checkout da Cakto
-  screens/                # Landing (vendas), Prospect (mapa), CategorySelect, Questionnaire, Result
-  data/niches.ts          # tipos de comércio para prospectar e o projeto sugerido para cada um
-  lib/leads.ts            # ordenação/filtros da lista e preenchimento do projeto a partir do comércio
-  components/             # QuestionField (texto, texto longo, escolha única, múltipla)
-  auth/useAccess.ts       # sessão do usuário e verificação do acesso pago
-  lib/access.ts           # regra de quando o acesso está válido
-  App.tsx                 # controla a navegação entre as telas
-api/cakto-webhook.ts      # recebe os avisos de pagamento da Cakto (roda na Vercel)
-api/places-search.ts      # busca comércios no Google (só para quem tem acesso)
-api/places-details.ts     # dados atualizados dos comércios salvos no funil
-src/lib/crm.ts            # etapas do funil e gravação no Supabase (tabela saved_leads)
-server/cakto.ts           # decide liberar, manter ou remover o acesso
-supabase/schema.sql       # tabelas e regras de segurança do banco
-```
-
-### Adicionando uma pergunta
-Em `src/data/categories.ts`, inclua um item em `questions` da seção desejada:
-
-```ts
-{ id: 'meuCampo', label: 'Minha pergunta?', type: 'single', options: ['A', 'B'], required: true }
-```
-
-Tipos disponíveis: `text`, `textarea`, `single` (escolha única) e `multi` (múltipla escolha).
-O `id` deve ser único dentro do questionário da categoria.
+Sobe um Postgres temporário, simula `auth`/`storage`/papéis do Supabase, aplica as migrations de
+`supabase/migrations/` e roda os testes de `supabase/tests/`.
