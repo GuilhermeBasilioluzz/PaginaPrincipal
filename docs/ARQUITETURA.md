@@ -32,7 +32,12 @@
 - **Equipe:** o dono adiciona por e-mail quem JÁ tem conta (`add_member_by_email`); convite por e-mail para quem
   não tem conta fica na ETAPA 10. Só o dono vê e-mails da equipe (`store_team`).
 - **Permissões no front** (`src/lib/permissions.ts`) só mostram/escondem botões; o banco decide.
-- **Marca:** o "H" e o nome em texto são provisórios, até recebermos o arquivo oficial da logo.
+- **Identidade visual (referência: arte enviada pelo cliente):** paleta preto `#070809`, bronze/cobre
+  (`#ddb480`, `#ddae83`, `#866851`), grafite quente (`#333438`) e off-white. Fontes autohospedadas
+  (`@fontsource`): Poppins (títulos e texto), Michroma (marca em caixa-alta larga) e Caveat (anotações
+  manuscritas). Tokens em `src/app/globals.css`.
+- **Marca:** o símbolo H (`src/components/Brand.tsx`) é um redesenho SVG provisório a partir da arte; trocar pelo
+  arquivo vetorial oficial da logo quando for enviado.
 - Endereços reservados (`/entrar`, `/app`, ...) ficam iguais no app e no banco (teste garante).
 
 ## Próximo

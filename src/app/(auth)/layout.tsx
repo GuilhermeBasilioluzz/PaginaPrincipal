@@ -7,7 +7,7 @@ import { getSupabaseEnv } from '@/lib/supabase/env'
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <main className="auth">
-      <Brand />
+      <Brand variant="lockup" />
       <div className="card auth-card">{getSupabaseEnv() ? children : <ConfigNotice />}</div>
     </main>
   )
