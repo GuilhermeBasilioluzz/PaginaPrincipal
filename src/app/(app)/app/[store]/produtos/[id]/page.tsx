@@ -8,11 +8,13 @@ import { formatInput } from '@/lib/money'
 import { splitSizes } from '@/lib/sizes'
 import { getMembership } from '@/lib/session'
 import { createClient } from '@/lib/supabase/server'
+import { getSupabaseEnv } from '@/lib/supabase/env'
+import { PhotoManager, type PhotoItem } from '@/components/PhotoManager'
 import { archiveProductAction, deleteProductAction, duplicateProductAction, restoreProductAction } from '../actions'
 
 export const metadata = { title: 'Editar produto' }
 
-const FLASH: Record<string, string> = { duplicated: 'Cópia criada. Ela está como indisponível: revise os dados, informe o estoque e publique.' }
+const FLASH: Record<string, string> = { created: 'Produto criado! Agora adicione as fotos abaixo.', duplicated: 'Cópia criada. Ela está como indisponível: revise os dados, informe o estoque e publique.' }
 
 export default async function EditProductPage({ params, searchParams }: {
   params: Promise<{ store: string; id: string }>
@@ -26,9 +28,10 @@ export default async function EditProductPage({ params, searchParams }: {
   const supabase = await createClient()
   const { data: p } = await supabase.from('products').select('*').eq('id', id).eq('store_id', store.id).maybeSingle()
   if (!p) notFound()
-  const [{ data: inv }, { data: categories }] = await Promise.all([
+  const [{ data: inv }, { data: categories }, { data: photos }] = await Promise.all([
     supabase.from('inventory').select('quantity').eq('product_id', id).maybeSingle(),
     supabase.from('categories').select('id, name').eq('store_id', store.id).order('position').order('name'),
+    supabase.from('product_images').select('id, path, kind, alt').eq('product_id', id).order('position'),
   ])
 
   const { checked, extra } = splitSizes(p.sizes ?? [])
@@ -52,6 +55,11 @@ export default async function EditProductPage({ params, searchParams }: {
         {editable
           ? <ProductForm storeId={store.id} slug={slug} productId={id} initial={initial} categories={categories ?? []} archived={archived} />
           : <p className="notice">Você só pode consultar este produto.</p>}
+      </div>
+
+      <div className="card">
+        <PhotoManager storeId={store.id} slug={slug} productId={id} productName={p.name} supabaseUrl={getSupabaseEnv()?.url ?? ''}
+          photos={(photos ?? []) as PhotoItem[]} canEdit={editable} />
       </div>
 
       {editable && (

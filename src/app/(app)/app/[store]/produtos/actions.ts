@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import { requireUser } from '@/lib/session'
 import { dbErrorMessage } from '@/lib/errors'
 import { readProductForm } from '@/lib/products'
+import { thumbPath } from '@/lib/images'
 import type { FormState } from '@/lib/types'
 
 const base = (slug: string) => `/app/${slug}/produtos`
@@ -27,11 +28,13 @@ export async function saveProductAction(
   if (!parsed.ok) return { error: parsed.error }
 
   const supabase = await createClient()
-  const { error } = await supabase.rpc('save_product', { p_store: storeId, p_id: productId, p: parsed.payload })
+  const { data, error } = await supabase.rpc('save_product', { p_store: storeId, p_id: productId, p: parsed.payload })
   if (error) return { error: dbErrorMessage(error) }
 
   revalidatePath(`/app/${slug}`, 'layout')
-  return flash(slug, 'ok', productId ? 'saved' : 'created')
+  // produto novo: vai direto para a edição, onde já dá para enviar as fotos
+  if (!productId && data) redirect(`${base(slug)}/${data}?ok=created`)
+  return flash(slug, 'ok', 'saved')
 }
 
 export async function duplicateProductAction(storeId: string, slug: string, productId: string) {
@@ -65,9 +68,12 @@ export async function restoreProductAction(slug: string, productId: string) {
 export async function deleteProductAction(slug: string, productId: string) {
   await requireUser()
   const supabase = await createClient()
+  const { data: imgs } = await supabase.from('product_images').select('path').eq('product_id', productId)
   const { data, error } = await supabase.from('products').delete().eq('id', productId).select('id')
   if (error) return flash(slug, 'erro', errorCode(error))
   if (!data?.length) return flash(slug, 'erro', 'forbidden') // atendente não apaga: arquiva
+  // o banco apagou as fotos em cascata; agora remove os arquivos do Storage (sem sobrar lixo)
+  if (imgs?.length) await supabase.storage.from('catalog').remove(imgs.flatMap((r) => [r.path, thumbPath(r.path)]))
   revalidatePath(`/app/${slug}`, 'layout')
   return flash(slug, 'ok', 'deleted')
 }

@@ -7,6 +7,8 @@ import { STATUS_LABEL, type ProductStatus } from '@/lib/dashboard'
 import { formatBRL } from '@/lib/money'
 import { PAGE_SIZE, listFilter, pageNumber, searchTerm, type ListFilter } from '@/lib/products'
 import { SubmitButton } from '@/components/ui'
+import { getSupabaseEnv } from '@/lib/supabase/env'
+import { publicUrl, thumbPath } from '@/lib/images'
 import { archiveProductAction, duplicateProductAction, restoreProductAction } from './actions'
 
 export const metadata = { title: 'Produtos' }
@@ -53,9 +55,13 @@ export default async function ProductsPage({ params, searchParams }: {
   const { data, count, error } = await query
   const rows = (data ?? []) as Row[]
   const stock = new Map<string, number>()
+  const cover = new Map<string, string>()
+  const base = getSupabaseEnv()?.url ?? ''
   if (rows.length) {
     const { data: inv } = await supabase.from('inventory').select('product_id, quantity').in('product_id', rows.map((r) => r.id))
     for (const i of inv ?? []) stock.set(i.product_id, i.quantity)
+    const { data: imgs } = await supabase.from('product_images').select('product_id, path').in('product_id', rows.map((r) => r.id)).order('position')
+    for (const i of imgs ?? []) if (!cover.has(i.product_id)) cover.set(i.product_id, i.path)
   }
 
   const total = count ?? 0
@@ -117,6 +123,12 @@ export default async function ProductsPage({ params, searchParams }: {
           const qty = stock.get(p.id) ?? 0
           return (
             <li key={p.id} className="product-row">
+              <Link href={`/app/${slug}/produtos/${p.id}`} className="thumb" aria-hidden="true" tabIndex={-1}>
+                {cover.has(p.id)
+                  // eslint-disable-next-line @next/next/no-img-element
+                  ? <img src={publicUrl(base, thumbPath(cover.get(p.id)!))} alt="" width={64} height={85} loading="lazy" decoding="async" />
+                  : <span className="thumb-empty">Sem foto</span>}
+              </Link>
               <div className="product-main">
                 <Link href={`/app/${slug}/produtos/${p.id}`} className="product-name">{p.name}</Link>
                 <span className="muted small">

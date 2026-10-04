@@ -64,5 +64,18 @@
 - **Lista:** busca por nome/SKU (texto sanitizado), filtro por situação, 20 por página.
 - **Ainda não faz:** fotos (ETAPA 5), categorias/coleções CRUD (6), regras automáticas de esgotado (7).
 
+## Decisões (ETAPA 5)
+- **Redimensiona no navegador** antes de enviar: foto de no máximo 1600 px + miniatura de 480 px, em WebP (JPEG se o
+  navegador não gerar WebP), respeitando a rotação do celular. Economiza internet e deixa o catálogo rápido.
+  Testado em Chromium real (4000×3000 → 1600×1200).
+- **Caminho:** `stores/{loja}/products/{produto}/{id}.webp` e `{id}_thumb.webp`. O servidor só registra caminhos que
+  pertencem à loja e ao produto; o Storage libera a escrita pela pasta da loja; o banco também valida o prefixo.
+- **Até 8 fotos por produto** (gatilho). A posição é do banco; **posição 0 = foto principal**; reordenar é atômico
+  (`reorder_product_images`). Tipos: frente, costas, lateral, detalhe, outra (sugestão automática ao enviar).
+- **Sem arquivos órfãos:** se o registro falha, o navegador apaga o que enviou; remover foto ou excluir produto também
+  remove os arquivos. (Apagar a loja inteira não limpa o Storage: tratar na ETAPA 18 / rotina de manutenção.)
+- Criar produto agora abre a tela de edição, já com o envio de fotos. Lista mostra a miniatura da foto principal.
+- Duplicar produto ainda não copia fotos (decisão: evitar duas linhas apontando para o mesmo arquivo).
+
 ## Próximo
-ETAPA 5: imagens (upload e galeria).
+ETAPA 6: categorias e coleções (CRUD, associar produtos, página da coleção).

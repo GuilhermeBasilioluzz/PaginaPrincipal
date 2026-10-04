@@ -36,6 +36,8 @@ export function dbErrorMessage(error: SupabaseLikeError): string {
     return 'Não encontramos uma conta com este e-mail. Peça para a pessoa criar uma conta no Hyperion primeiro.'
   }
   if (message.includes('already_member')) return 'Esta pessoa já faz parte da equipe.'
+  if (message.includes('limit_reached')) return 'Cada produto aceita até 8 fotos.'
+  if (message.includes('invalid_order')) return 'A ordem das fotos mudou. Atualize a página e tente de novo.'
   if (message.includes('products_sku_uidx')) return 'Já existe um produto com este código (SKU) nesta loja.'
   if (message.includes('not_found')) return 'Este produto não existe mais ou você não tem acesso a ele.'
   if (message.includes('ao menos um dono')) return 'A loja precisa ter pelo menos um dono.'
