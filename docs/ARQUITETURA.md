@@ -40,5 +40,15 @@
   arquivo vetorial oficial da logo quando for enviado.
 - Endereços reservados (`/entrar`, `/app`, ...) ficam iguais no app e no banco (teste garante).
 
+## Decisões (ETAPA 3)
+- **Painel com dados reais:** uma única função `store_dashboard()` (SECURITY INVOKER, então o RLS vale) devolve
+  contagens por situação, destaque, coleções, estoque baixo/esgotado e as 8 últimas atividades com o autor.
+  Quem não é da loja recebe zeros.
+- **Sem números inventados:** Visualizações, cliques no WhatsApp e Stories importados aparecem como "Em breve" até
+  as etapas de análises (15) e Instagram (11-12). "Últimas atividades" usa, por enquanto, as alterações em produtos;
+  o histórico completo (`activity_logs`) vem na ETAPA 10.
+- **Total de produtos não conta arquivados**; "Poucas unidades"/"Esgotados" só consideram produtos disponíveis ou reservados.
+- **Atenção p/ ETAPA 4/7:** produto novo nasce com estoque 0 (conta como esgotado). O cadastro precisa pedir a quantidade.
+
 ## Próximo
-ETAPA 3: dashboard da loja.
+ETAPA 4: produtos (CRUD).

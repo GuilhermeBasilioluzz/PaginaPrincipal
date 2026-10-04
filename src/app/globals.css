@@ -114,3 +114,30 @@ input:focus, select:focus { border-color: var(--bronze); }
 .notice-config { max-width: 520px; }
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* painel */
+.tiles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+.tiles-3 { grid-template-columns: repeat(2, 1fr); }
+@media (min-width: 720px) { .tiles { grid-template-columns: repeat(4, 1fr); } .tiles-3 { grid-template-columns: repeat(3, 1fr); } }
+.tile { display: grid; gap: 0.15rem; align-content: start; padding: 1rem; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface);
+  background-image: linear-gradient(160deg, rgba(221, 180, 128, 0.05), transparent 45%); }
+.tile-label { font-size: 0.8rem; color: var(--muted); }
+.tile-value { font-size: clamp(1.7rem, 6vw, 2.2rem); font-weight: 600; line-height: 1.1; color: var(--text); }
+.tile-hint { font-size: 0.75rem; color: var(--muted); }
+.tile-warn { border-color: var(--bronze-lo); }
+.tile-warn .tile-value { color: var(--copper); }
+.tile-soon { border-style: dashed; background-image: none; }
+.tile-soon .tile-value { color: var(--bronze-deep); }
+.bar { display: flex; height: 12px; border-radius: 999px; overflow: hidden; background: var(--surface-2); }
+.bar-seg { display: block; height: 100%; }
+.bar-available { background: #e8cba8; }
+.bar-reserved { background: #b98b63; }
+.bar-sold { background: #866851; }
+.bar-unavailable { background: #4a4b52; }
+.legend { list-style: none; margin: 0.9rem 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem 1.4rem; font-size: 0.9rem; }
+.dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 0.3rem; }
+.activity { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.15rem; }
+.activity li { display: grid; grid-template-columns: 5.5rem 1fr; gap: 0.75rem; padding: 0.6rem 0; border-bottom: 1px solid var(--line); align-items: baseline; }
+.activity li:last-child { border-bottom: 0; }
+.empty { text-align: center; display: grid; gap: 0.8rem; justify-items: center; padding-block: clamp(2rem, 8vw, 3.5rem); }
+.eyebrow { margin: 0; }
