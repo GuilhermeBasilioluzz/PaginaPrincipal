@@ -21,5 +21,19 @@
 2. `..._rls.sql` — funções de apoio, GRANTs, políticas, RPCs
 3. `..._storage.sql` — buckets e políticas de arquivos
 
+## Decisões (ETAPA 2)
+- **Next.js 16 (App Router) + Supabase Auth** com cookies (`@supabase/ssr`). Telas em português, tema preto/dourado.
+- **Login:** e-mail e senha, **ou** link por e-mail; cadastro; recuperação de senha. "Link por e-mail" e
+  "recuperar senha" respondem sempre igual, para não revelar quais e-mails têm conta.
+- **Segurança:** `src/proxy.ts` renova a sessão e leva visitantes para `/entrar`, mas é só conveniência: cada
+  página exige a sessão (`requireUser`) e o RLS decide o acesso aos dados. Destino pós-login só aceita caminhos
+  internos (`safeNext`). Links de e-mail usam `NEXT_PUBLIC_SITE_URL`, nunca cabeçalhos da requisição.
+- **Loja de outra pessoa = 404** (não revela que existe).
+- **Equipe:** o dono adiciona por e-mail quem JÁ tem conta (`add_member_by_email`); convite por e-mail para quem
+  não tem conta fica na ETAPA 10. Só o dono vê e-mails da equipe (`store_team`).
+- **Permissões no front** (`src/lib/permissions.ts`) só mostram/escondem botões; o banco decide.
+- **Marca:** o "H" e o nome em texto são provisórios, até recebermos o arquivo oficial da logo.
+- Endereços reservados (`/entrar`, `/app`, ...) ficam iguais no app e no banco (teste garante).
+
 ## Próximo
-ETAPA 2: base Next.js (App Router), autenticação, perfil, loja e membros.
+ETAPA 3: dashboard da loja.
