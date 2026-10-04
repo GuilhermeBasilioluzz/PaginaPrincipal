@@ -69,7 +69,8 @@ select test.denied('alice NÃO cria produto na Loja B',
 select test.affects('alice NÃO edita produto da B', $$update public.products set name = 'x' where id = 'eeeeeeee-0000-0000-0000-000000000b01'$$, 0);
 select test.affects('alice NÃO apaga produto da B', $$delete from public.products where id = 'eeeeeeee-0000-0000-0000-000000000b01'$$, 0);
 select test.affects('alice NÃO edita a Loja B', $$update public.stores set name = 'x' where id = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'$$, 0);
-select test.affects('alice NÃO mexe no estoque da B', $$update public.inventory set quantity = 99 where store_id = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'$$, 0);
+select test.denied('alice NÃO mexe no estoque da B (nem direto, nem pelas funções)', $$update public.inventory set quantity = 99 where store_id = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'$$);
+select test.denied('alice NÃO ajusta estoque de produto da B pela função', $$select public.adjust_stock('eeeeeeee-0000-0000-0000-000000000b01', 5, 'restock')$$);
 select test.denied('alice NÃO move produto da A para a B (store_id é imutável)',
   $$update public.products set store_id = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb' where id = 'eeeeeeee-0000-0000-0000-000000000a01'$$);
 select test.denied('alice NÃO se adiciona como membro da B',
@@ -106,7 +107,8 @@ select test.denied('atendente NÃO forja created_by',
   $$insert into public.products (store_id, name, slug, price, created_by) values ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'Fake', 'fake', 1, '00000000-0000-0000-0000-000000000001')$$);
 select test.affects('atendente edita produto', $$update public.products set status = 'reserved' where id = 'eeeeeeee-0000-0000-0000-000000000a01'$$, 1);
 select test.ok('edição registra updated_by = bruno', (select updated_by from public.products where id = 'eeeeeeee-0000-0000-0000-000000000a01') = '00000000-0000-0000-0000-000000000002');
-select test.affects('atendente atualiza estoque', $$update public.inventory set quantity = 5 where product_id = 'eeeeeeee-0000-0000-0000-000000000a01'$$, 1);
+select test.denied('atendente NÃO altera a quantidade direto na tabela (só pelas funções, com histórico)', $$update public.inventory set quantity = 5 where product_id = 'eeeeeeee-0000-0000-0000-000000000a01'$$);
+select test.ok('atendente atualiza estoque pela função', public.set_stock('eeeeeeee-0000-0000-0000-000000000a01', 5, 'contagem') = 5);
 select test.ok('estoque registra updated_by = bruno', (select updated_by from public.inventory where product_id = 'eeeeeeee-0000-0000-0000-000000000a01') = '00000000-0000-0000-0000-000000000002');
 select test.denied('estoque não aceita quantidade negativa', $$update public.inventory set quantity = -1 where product_id = 'eeeeeeee-0000-0000-0000-000000000a01'$$);
 select test.affects('atendente coloca peça em coleção',

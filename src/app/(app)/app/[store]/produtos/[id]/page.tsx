@@ -11,11 +11,15 @@ import { createClient } from '@/lib/supabase/server'
 import { getSupabaseEnv } from '@/lib/supabase/env'
 import { PhotoManager, type PhotoItem } from '@/components/PhotoManager'
 import { setProductCollectionsAction } from '../../colecoes/actions'
+import { adjustStockAction, setStockAction } from '../../estoque/actions'
+import { describeMovement, type FeedItem } from '@/lib/stock'
+import { STOCK_FLASH } from '@/lib/flash'
+import { timeAgo } from '@/lib/dashboard'
 import { archiveProductAction, deleteProductAction, duplicateProductAction, restoreProductAction } from '../actions'
 
 export const metadata = { title: 'Editar produto' }
 
-const FLASH: Record<string, string> = { collections: 'Coleções da peça atualizadas.', forbidden: 'Você não tem permissão para fazer isso.', created: 'Produto criado! Agora adicione as fotos abaixo.', duplicated: 'Cópia criada. Ela está como indisponível: revise os dados, informe o estoque e publique.' }
+const FLASH: Record<string, string> = { ...STOCK_FLASH, collections: 'Coleções da peça atualizadas.', forbidden: 'Você não tem permissão para fazer isso.', created: 'Produto criado! Agora adicione as fotos abaixo.', duplicated: 'Cópia criada. Ela está como indisponível: revise os dados, informe o estoque e publique.' }
 
 export default async function EditProductPage({ params, searchParams }: {
   params: Promise<{ store: string; id: string }>
@@ -29,13 +33,19 @@ export default async function EditProductPage({ params, searchParams }: {
   const supabase = await createClient()
   const { data: p } = await supabase.from('products').select('*').eq('id', id).eq('store_id', store.id).maybeSingle()
   if (!p) notFound()
-  const [{ data: inv }, { data: categories }, { data: photos }, { data: manualCols }, { data: memberOf }] = await Promise.all([
+  const [{ data: inv }, { data: categories }, { data: photos }, { data: manualCols }, { data: memberOf }, { data: activeRes }, { data: history }] = await Promise.all([
     supabase.from('inventory').select('quantity').eq('product_id', id).maybeSingle(),
     supabase.from('categories').select('id, name').eq('store_id', store.id).order('position').order('name'),
     supabase.from('product_images').select('id, path, kind, alt').eq('product_id', id).order('position'),
     supabase.from('collections').select('id, name').eq('store_id', store.id).eq('kind', 'manual').order('name'),
     supabase.from('collection_products').select('collection_id').eq('product_id', id),
+    supabase.from('reservations').select('quantity, expires_at').eq('product_id', id).in('status', ['requested', 'confirmed']),
+    supabase.rpc('store_stock_feed', { p_store: store.id, p_limit: 10, p_product: id }),
   ])
+  const now = Date.now()
+  const reservedQty = (activeRes ?? []).filter((r) => !r.expires_at || new Date(r.expires_at).getTime() > now).reduce((a, r) => a + r.quantity, 0)
+  const onHand = inv?.quantity ?? 0
+  const here = `/app/${slug}/produtos/${id}`
   const inCollections = new Set((memberOf ?? []).map((m) => m.collection_id))
 
   const { checked, extra } = splitSizes(p.sizes ?? [])
@@ -66,6 +76,40 @@ export default async function EditProductPage({ params, searchParams }: {
         <PhotoManager storeId={store.id} slug={slug} productId={id} productName={p.name} supabaseUrl={getSupabaseEnv()?.url ?? ''}
           photos={(photos ?? []) as PhotoItem[]} canEdit={editable} />
       </div>
+
+      <section className="card stack" aria-labelledby="estoque-h">
+        <h2 id="estoque-h">Estoque</h2>
+        <div className="tiles tiles-3">
+          <div className="tile"><span className="tile-label">Em estoque</span><strong className="tile-value">{onHand}</strong></div>
+          <div className="tile"><span className="tile-label">Reservadas</span><strong className="tile-value">{reservedQty}</strong></div>
+          <div className="tile"><span className="tile-label">Livres</span><strong className="tile-value">{Math.max(onHand - reservedQty, 0)}</strong></div>
+        </div>
+        {editable && (
+          <>
+            <form action={adjustStockAction.bind(null, slug, id)} className="row">
+              <input type="hidden" name="back" value={here} />
+              <input type="number" name="qty" min={1} max={99999} defaultValue={1} inputMode="numeric" aria-label="Quantidade" className="qty" />
+              <button className="btn btn-ghost" name="op" value="restock" type="submit">+ Entrada</button>
+              <button className="btn btn-ghost" name="op" value="sale" type="submit">− Venda</button>
+              <button className="btn btn-ghost" name="op" value="return" type="submit">Devolução</button>
+            </form>
+            <form action={setStockAction.bind(null, slug, id)} className="row">
+              <input type="hidden" name="back" value={here} />
+              <input type="number" name="quantity" min={0} max={99999} defaultValue={onHand} inputMode="numeric" aria-label="Quantidade contada" className="qty" />
+              <SubmitButton variant="ghost">Corrigir pela contagem</SubmitButton>
+              <Link href={`/app/${slug}/reservas/nova?produto=${id}`} className="btn btn-ghost">Reservar para uma cliente</Link>
+            </form>
+          </>
+        )}
+        <h3 style={{ margin: '0.5rem 0 0', fontSize: '1rem' }}>Histórico da peça</h3>
+        {((history ?? []) as FeedItem[]).length === 0 ? <p className="muted small">Nenhuma movimentação ainda.</p> : (
+          <ul className="activity">
+            {((history ?? []) as FeedItem[]).map((m) => (
+              <li key={m.id}><span className="muted small">{timeAgo(m.created_at)}</span><span>{describeMovement(m)}</span></li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       <div className="card stack">
         <h2>Coleções</h2>

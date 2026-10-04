@@ -22,6 +22,8 @@ export default async function StoreLayout({ children, params }: {
         <nav className="subnav wrap" aria-label="Loja">
           <Link href={`/app/${slug}`}>Painel</Link>
           <Link href={`/app/${slug}/produtos`}>Produtos</Link>
+          <Link href={`/app/${slug}/estoque`}>Estoque</Link>
+          <Link href={`/app/${slug}/reservas`}>Reservas</Link>
           <Link href={`/app/${slug}/colecoes`}>Coleções</Link>
           <Link href={`/app/${slug}/categorias`}>Categorias</Link>
           <Link href={`/app/${slug}/equipe`}>Equipe</Link>

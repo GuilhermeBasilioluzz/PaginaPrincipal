@@ -52,6 +52,7 @@ export function DashboardView({ data, canEdit, now, newProductHref }: { data: Da
           <Tile label="Disponíveis" value={p.available} />
           <Tile label="Reservados" value={p.reserved} />
           <Tile label="Vendidos" value={p.sold} />
+          <Tile label="Reservas ativas" value={data.reservations} />
           <Tile label="Em destaque" value={p.featured} />
           <Tile label="Coleções" value={data.collections} />
           <Tile label="Poucas unidades" value={data.stock.low} tone="warn" hint="Perto de acabar" />

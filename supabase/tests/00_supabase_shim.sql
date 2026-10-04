@@ -40,3 +40,6 @@ grant select on storage.buckets to anon, authenticated;
 -- O Supabase concede tudo por padrão nas tabelas novas de public; as migrations precisam revogar.
 alter default privileges in schema public grant all on tables    to anon, authenticated, service_role;
 alter default privileges in schema public grant all on functions to anon, authenticated, service_role;
+
+-- O Supabase tem a publicação do Realtime pronta; as migrations adicionam suas tabelas a ela.
+create publication supabase_realtime;

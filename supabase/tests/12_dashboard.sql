@@ -64,6 +64,7 @@ select test.ok('arquivados = 1',    (select (j #>> '{products,archived}')::int f
 select test.ok('em destaque não conta arquivado (1)', (select (j #>> '{products,featured}')::int from d) = 1);
 select test.ok('coleções = 2, categorias = 1, equipe = 2',
   (select (j ->> 'collections')::int from d) = 2 and (select (j ->> 'categories')::int from d) = 1 and (select (j ->> 'team')::int from d) = 2);
+select test.ok('sem reservas ativas, o painel mostra 0', (select (j ->> 'reservations')::int from d) = 0);
 select test.ok('poucas unidades = 2 (p2 e p4)', (select (j #>> '{stock,low}')::int from d) = 2);
 select test.ok('esgotados = 1 (p3; vendido e indisponível não contam)', (select (j #>> '{stock,out}')::int from d) = 1);
 select test.ok('atividade recente: no máximo 8, mais recente primeiro, com autor',

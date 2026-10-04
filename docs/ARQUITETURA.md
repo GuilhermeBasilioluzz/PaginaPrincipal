@@ -94,5 +94,21 @@ Stories somem em 24 h; o catálogo não. A loja posta no Instagram, o Hyperion r
 ("Stories recebidos"), a equipe confirma (semiautomático) e o conteúdo vira produtos/coleção que permanecem.
 Entrada manual (print/foto do Story) e conexão oficial com a Meta alimentam a mesma caixa. Detalhes: `docs/INSTAGRAM.md`.
 
+## Decisões (ETAPA 7)
+- **Três números por peça:** em estoque (físico), reservadas (reservas ativas e não vencidas) e livres (estoque − reservadas).
+- **A quantidade só muda por funções** (`adjust_stock`, `set_stock`, reservas, retirada), nunca por UPDATE direto. Cada mudança grava
+  quem, quando, quanto e por quê em `inventory_movements` (somente leitura para a equipe). Reservas também entram nessa linha do tempo.
+  A linha da peça é travada (`FOR UPDATE`): duas atendentes mexendo ao mesmo tempo não se atropelam. Nunca fica negativo nem abaixo do reservado.
+- **Reservas:** cliente, contato, tamanho, observação, quem reservou, prazo opcional. Situações: solicitada → confirmada → retirada
+  (vira venda e baixa o estoque) ou cancelada (libera). Reserva vencida deixa de segurar a peça. Solicitações feitas pela cliente no
+  catálogo (status `requested`) entram na ETAPA 9 e já são tratadas aqui.
+- **Situação automática:** estoque 0 → "vendido" (esgotado); tudo reservado → "reservado"; senão "disponível". "Indisponível" e
+  "arquivado" são decisões humanas e nunca são alteradas. Escolher a situação à mão no cadastro vale até o próximo evento de estoque.
+  Limite: o vencimento de uma reserva só reflete na situação no próximo evento (falta uma rotina periódica — ETAPA 20).
+- **Ao vivo:** `inventory`, `reservations` e `inventory_movements` estão na publicação `supabase_realtime`. A tela escuta mudanças
+  da loja (o Realtime respeita o RLS) e pede os dados novos ao servidor; sem conexão, atualiza a cada 20 s e ao voltar à aba.
+- Painel principal ganhou "Reservas ativas". Telas: Estoque (totais, filtros, ajuste rápido, "o que está acontecendo"), Reservas
+  (ativas/retiradas/canceladas, com quem reservou e para quem) e bloco de estoque + histórico em cada produto.
+
 ## Próximo
-ETAPA 7: estoque (quantidade, esgotado automático, movimentações, reservado).
+ETAPA 8: catálogo público (página da loja, categorias, coleções, busca e filtros).

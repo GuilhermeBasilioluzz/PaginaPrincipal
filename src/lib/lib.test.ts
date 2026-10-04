@@ -110,6 +110,10 @@ describe('mensagens de erro', () => {
     expect(dbErrorMessage({ code: 'P0002', message: 'not_found' })).toContain('não existe')
     expect(dbErrorMessage({ code: '23503', message: 'x' })).toContain('Categoria')
   })
+  it('traduz erros de estoque', () => {
+    expect(dbErrorMessage({ code: '23514', message: 'below_reserved' })).toContain('reservado')
+    expect(dbErrorMessage({ code: '23514', message: 'insufficient_stock' })).toContain('suficiente')
+  })
   it('traduz erros do banco', () => {
     expect(dbErrorMessage({ message: 'user_not_found', code: 'P0002' })).toContain('criar uma conta')
     expect(dbErrorMessage({ message: 'already_member', code: '23505' })).toContain('já faz parte')
