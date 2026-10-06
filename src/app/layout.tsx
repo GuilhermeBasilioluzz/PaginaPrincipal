@@ -5,8 +5,10 @@ import '@fontsource/poppins/latin-600.css'
 import '@fontsource/michroma/latin-400.css'
 import '@fontsource/caveat/latin-500.css'
 import './globals.css'
+import { siteUrl } from '@/lib/supabase/env'
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl()),
   title: { default: 'Hyperion Systems', template: '%s · Hyperion' },
   description: 'Seus Stories duram 24 horas. Seu catálogo, não.',
 }

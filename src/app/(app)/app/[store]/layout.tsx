@@ -24,9 +24,11 @@ export default async function StoreLayout({ children, params }: {
           <Link href={`/app/${slug}/produtos`}>Produtos</Link>
           <Link href={`/app/${slug}/estoque`}>Estoque</Link>
           <Link href={`/app/${slug}/reservas`}>Reservas</Link>
+          <Link href={`/app/${slug}/interessados`}>Interessadas</Link>
           <Link href={`/app/${slug}/colecoes`}>Coleções</Link>
           <Link href={`/app/${slug}/categorias`}>Categorias</Link>
           <Link href={`/app/${slug}/equipe`}>Equipe</Link>
+          <Link href={`/app/${slug}/configuracoes`}>Configurações</Link>
         </nav>
       </div>
       {!store.is_active && (

@@ -34,7 +34,8 @@ function draw(bitmap: ImageBitmap, width: number, height: number): HTMLCanvasEle
  * Lê a foto (respeitando a rotação do celular), reduz para no máximo 1600 px no maior lado e gera
  * uma miniatura de 480 px. Economiza a internet da atendente e deixa o catálogo mais rápido.
  */
-export async function prepareImage(file: File): Promise<PreparedImage> {
+export async function prepareImage(file: File, opts: { maxSide?: number; withThumb?: boolean } = {}): Promise<PreparedImage> {
+  const maxSide = opts.maxSide ?? MAX_SIDE
   if (!ACCEPTED.includes(file.type)) throw new ImageError(`"${file.name}" não é uma imagem aceita. Use JPG, PNG ou WebP.`)
   if (file.size > MAX_ORIGINAL_BYTES) throw new ImageError(`"${file.name}" é grande demais (máximo 25 MB).`)
 
@@ -46,10 +47,10 @@ export async function prepareImage(file: File): Promise<PreparedImage> {
   }
 
   try {
-    const size = fitWithin(bitmap.width, bitmap.height, MAX_SIDE)
+    const size = fitWithin(bitmap.width, bitmap.height, maxSide)
     const thumbSize = fitWithin(bitmap.width, bitmap.height, THUMB_SIDE)
     const main = await encode(draw(bitmap, size.width, size.height), 0.82)
-    const thumb = await encode(draw(bitmap, thumbSize.width, thumbSize.height), 0.75)
+    const thumb = opts.withThumb === false ? main : await encode(draw(bitmap, thumbSize.width, thumbSize.height), 0.75)
     // as duas precisam ter a mesma extensão (a miniatura é derivada do caminho da foto)
     if (thumb.ext !== main.ext) throw new ImageError('Não foi possível preparar esta imagem.')
     return { main: main.blob, thumb: thumb.blob, ext: main.ext, width: size.width, height: size.height }

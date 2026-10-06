@@ -17,3 +17,11 @@ export const STOCK_FLASH: Record<string, string> = {
   forbidden: 'Você não tem permissão para fazer isso (ou a loja está desativada).',
   not_found: 'Item não encontrado.', generic: 'Algo deu errado. Tente novamente.',
 }
+
+export const INTEREST_FLASH: Record<string, string> = {
+  created: 'Pessoa anotada na lista de espera.', already: 'Ela já estava na lista desta peça: atualizamos os dados.',
+  waiting: 'Voltou para "aguardando".', contacted: 'Marcada como avisada.', converted: 'Marcada como venda concretizada.',
+  dismissed: 'Dispensada da lista.', deleted: 'Pessoa removida da lista.',
+  invalid: 'Confira os dados informados.', forbidden: 'Você não tem permissão para fazer isso.',
+  not_found: 'Item não encontrado.', generic: 'Algo deu errado. Tente novamente.',
+}

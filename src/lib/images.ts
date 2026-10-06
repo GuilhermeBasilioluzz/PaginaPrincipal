@@ -55,3 +55,14 @@ export function moveItem<T>(list: T[], from: number, to: number): T[] {
   copy.splice(to, 0, item)
   return copy
 }
+
+export type BrandingKind = 'logo' | 'banner'
+
+/** stores/{loja}/branding/logo-{id}.webp — só o dono envia para esta pasta (regra do Storage). */
+export function brandingPath(storeId: string, kind: BrandingKind, imageId: string, ext: 'webp' | 'jpg'): string {
+  return `stores/${storeId}/branding/${kind}-${imageId}.${ext}`
+}
+
+export function isValidBrandingPath(path: string, storeId: string, kind: BrandingKind): boolean {
+  return new RegExp(`^stores/${storeId}/branding/${kind}-${UUID}\\.(webp|jpg)$`, 'i').test(path)
+}

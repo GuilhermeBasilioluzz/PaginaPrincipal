@@ -8,6 +8,7 @@ import { can } from '@/lib/permissions'
 import { PAGE_SIZE, pageNumber, searchTerm } from '@/lib/products'
 import { STOCK_FLASH } from '@/lib/flash'
 import { timeAgo } from '@/lib/dashboard'
+import type { InterestOverviewRow } from '@/lib/interest'
 import { STATE_LABEL, describeMovement, parseTotals, type FeedItem, type StockRow } from '@/lib/stock'
 import { adjustStockAction } from './actions'
 
@@ -32,11 +33,13 @@ export default async function StockPage({ params, searchParams }: {
   const page = pageNumber(sp.page)
 
   const supabase = await createClient()
-  const [totalsRes, rowsRes, feedRes] = await Promise.all([
+  const [totalsRes, rowsRes, feedRes, demandRes] = await Promise.all([
     supabase.rpc('store_stock_totals', { p_store: store.id }),
     supabase.rpc('store_stock_overview', { p_store: store.id, p_filter: filter, p_q: q, p_limit: PAGE_SIZE, p_offset: (page - 1) * PAGE_SIZE }),
     supabase.rpc('store_stock_feed', { p_store: store.id, p_limit: 20 }),
+    supabase.rpc('store_interest_overview', { p_store: store.id }),
   ])
+  const demand = new Map(((demandRes.data ?? []) as InterestOverviewRow[]).map((d) => [d.product_id, d]))
   const totals = parseTotals(totalsRes.data)
   const rows = (rowsRes.data ?? []) as StockRow[]
   const feed = (feedRes.data ?? []) as FeedItem[]
@@ -100,6 +103,11 @@ export default async function StockPage({ params, searchParams }: {
                 <span><strong>{Math.max(r.available, 0)}</strong> livres</span>
                 <span className={`badge${r.stock_state === 'ok' ? '' : r.stock_state === 'reserved' ? ' badge-auto' : ' badge-warn'}`}>{STATE_LABEL[r.stock_state]}</span>
               </div>
+              {demand.has(r.product_id) && (demand.get(r.product_id)!.waiting + demand.get(r.product_id)!.contacted + demand.get(r.product_id)!.clicks_30d) > 0 && (
+                <Link href={`/app/${slug}/interessados?produto=${r.product_id}`} className="small link">
+                  🔔 {demand.get(r.product_id)!.waiting + demand.get(r.product_id)!.contacted} na lista · {demand.get(r.product_id)!.clicks_30d} pedidos de aviso (30 dias)
+                </Link>
+              )}
               {r.reservations.length > 0 && (
                 <ul className="stock-res">
                   {r.reservations.map((x) => (

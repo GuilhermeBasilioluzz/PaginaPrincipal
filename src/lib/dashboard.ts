@@ -19,6 +19,8 @@ const schema = z.object({
   categories: n,
   team: n,
   reservations: n,
+  interests: n,
+  interest_clicks: n,
   stock: z.object({ low: n, out: n }).catch({ low: 0, out: 0 }),
   recent: z.array(z.object({
     id: z.string(),

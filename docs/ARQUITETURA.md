@@ -110,5 +110,30 @@ Entrada manual (print/foto do Story) e conexão oficial com a Meta alimentam a m
 - Painel principal ganhou "Reservas ativas". Telas: Estoque (totais, filtros, ajuste rápido, "o que está acontecendo"), Reservas
   (ativas/retiradas/canceladas, com quem reservou e para quem) e bloco de estoque + histórico em cada produto.
 
+## Decisões (ETAPA 8 — catálogo público)
+- **Rotas:** `/{loja}` (vitrine), `/{loja}/colecao/{coleção}`, `/{loja}/produto/{peça}` (versão enxuta; a completa é a ETAPA 9).
+  Endereços do sistema (`/entrar`, `/app`…) são reservados e nunca viram nome de loja.
+- **Uma consulta por página** (`catalog_store` + `catalog_products`, sem N+1). São funções SECURITY DEFINER que só devolvem colunas
+  seguras e **rótulos** de estoque (disponível, poucas unidades, reservado, esgotado), nunca quantidades, SKU ou autores.
+  Loja desligada ou desativada devolve vazio. O catálogo usa um cliente SEM sessão (visitante), mesmo para quem está logado.
+- **Esgotado aparece como "Esgotado"** e vai para o fim da lista; a loja pode ocultar (`hide_sold_out`).
+- **Busca:** sem acento e sem diferenciar maiúsculas, todas as palavras precisam aparecer (nome, descrição, cor, categoria), palavras de
+  ligação ignoradas ("roupa para festa"), curingas tratados como texto, SKU nunca é pesquisável pelo público.
+  Filtros: categoria (com subcategorias), coleção, cor, tamanho, faixa de preço (considera a promoção), só com estoque, ordenação. 24 por página.
+- **Mobile-first:** 2 colunas no celular, imagens com tamanho fixo (sem pulo de layout), miniaturas, primeiras 4 imagens com prioridade,
+  filtros por URL (funcionam sem JavaScript e podem ser compartilhados).
+- **SEO:** título, descrição, Open Graph e canonical por loja, coleção e peça; prévia bonita no WhatsApp.
+- **Configurações da loja** (`/app/{loja}/configuracoes`, só o dono): nome, frase, sobre, WhatsApp, Instagram (aceita @ ou link; recusa
+  links de outros sites), endereço, horário, logo e banner (redimensionados no navegador), catálogo ligado/desligado, ocultar esgotados.
+
+### "Avise-me quando chegar" (pedido do cliente)
+- Na página da peça esgotada ou toda reservada, o botão **registra um clique anônimo** (contador por peça e por dia, sem dados
+  pessoais) e **leva direto ao WhatsApp da loja com a mensagem pronta** (nome da peça + link). É um POST: robôs e pré-visualizações não
+  inflam a contagem; só aceita o próprio site.
+- A vendedora vê a **demanda por peça** (pedidos de aviso em 30 dias, pessoas na lista, tamanhos mais pedidos) e **anota quem chamou**
+  numa lista de espera. Quando a peça volta ao estoque, o painel destaca "avise quem esperava" e cada pessoa tem um botão de WhatsApp com
+  mensagem pronta. Da lista dá para "reservar para ela" (a pessoa vira "venda" ao reservar). Dono/gerente apagam os dados a pedido (LGPD).
+- O aviso é **manual**: não há envio automático de WhatsApp. Cliques não identificam ninguém; a identificação vem da conversa.
+
 ## Próximo
-ETAPA 8: catálogo público (página da loja, categorias, coleções, busca e filtros).
+ETAPA 9: página completa do produto (galeria, relacionados, compartilhar, copiar link, SEO estruturado).

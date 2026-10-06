@@ -65,6 +65,9 @@ export async function createReservationAction(slug: string, fd: FormData) {
     p_size: p.size || null, p_note: p.note || null, p_expires: p.expires,
   })
   if (error) return redirect(`/app/${slug}/reservas/nova?erro=${errorCode(error)}&produto=${encodeURIComponent(p.product)}`)
+  // reserva feita a partir da lista de espera: a pessoa passa a "venda concretizada"
+  const interest = String(fd.get('interest') ?? '')
+  if (UUID.test(interest)) await supabase.rpc('set_interest_status', { p_id: interest, p_status: 'converted' })
   revalidatePath(`/app/${slug}`, 'layout')
   return redirect(`/app/${slug}/reservas?ok=reserved`)
 }

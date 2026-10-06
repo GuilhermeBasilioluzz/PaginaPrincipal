@@ -11,7 +11,7 @@ import { createReservationAction } from '../../estoque/actions'
 export const metadata = { title: 'Nova reserva' }
 
 export default async function NewReservationPage({ params, searchParams }: {
-  params: Promise<{ store: string }>; searchParams: Promise<{ produto?: string; erro?: string }>
+  params: Promise<{ store: string }>; searchParams: Promise<{ produto?: string; erro?: string; cliente?: string; contato?: string; interesse?: string }>
 }) {
   const [{ store: slug }, sp] = await Promise.all([params, searchParams])
   const membership = await getMembership(slug)
@@ -24,6 +24,9 @@ export default async function NewReservationPage({ params, searchParams }: {
   const selected = products.find((p) => p.product_id === sp.produto)
   const sizes = selected ? ((await supabase.from('products').select('sizes').eq('id', selected.product_id).maybeSingle()).data?.sizes ?? []) as string[] : []
   const erro = sp.erro ? STOCK_FLASH[sp.erro] : null
+  const interest = sp.interesse && /^[0-9a-f-]{36}$/i.test(sp.interesse) ? sp.interesse : ''
+  const prefillName = (sp.cliente ?? '').slice(0, 80)
+  const prefillContact = (sp.contato ?? '').replace(/[^\d+() -]/g, '').slice(0, 40)
 
   return (
     <div className="card narrow">
@@ -48,8 +51,9 @@ export default async function NewReservationPage({ params, searchParams }: {
               ? <label className="field"><span className="field-label">Tamanho</span><select name="size" defaultValue=""><option value="">Qualquer</option>{sizes.map((s) => <option key={s}>{s}</option>)}</select></label>
               : <Field label="Tamanho (opcional)" name="size" maxLength={12} />}
           </div>
-          <Field label="Nome da cliente" name="customer" required maxLength={80} autoComplete="off" />
-          <Field label="WhatsApp ou telefone (opcional)" name="contact" maxLength={40} inputMode="tel" autoComplete="off" />
+          {interest && <input type="hidden" name="interest" value={interest} />}
+          <Field label="Nome da cliente" name="customer" required maxLength={80} autoComplete="off" defaultValue={prefillName} />
+          <Field label="WhatsApp ou telefone (opcional)" name="contact" maxLength={40} inputMode="tel" autoComplete="off" defaultValue={prefillContact} />
           <label className="field">
             <span className="field-label">Segurar a peça</span>
             <select name="hold" defaultValue="24h">{Object.entries(HOLD_OPTIONS).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}</select>

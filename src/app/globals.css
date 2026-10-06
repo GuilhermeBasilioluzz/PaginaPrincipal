@@ -221,3 +221,70 @@ textarea:focus { border-color: var(--bronze); }
 input.qty { width: 4.5rem; min-height: 40px; text-align: center; padding: 0.3rem; }
 @media (min-width: 720px) { .stock-row { grid-template-columns: 1fr auto; align-items: start; } }
 a.tile { text-decoration: none; color: inherit; }
+
+/* identidade visual (configurações) */
+.branding { display: grid; gap: 0.8rem; grid-template-columns: 96px 1fr; align-items: center; }
+.branding-preview { display: grid; place-items: center; height: 96px; border: 1px dashed var(--line); border-radius: 12px; overflow: hidden; background: var(--surface-2); }
+.branding-preview img { width: 100%; height: 100%; object-fit: cover; }
+.branding-logo { border-radius: 50%; }
+@media (min-width: 560px) { .branding-banner { width: 100%; } }
+
+/* catálogo público */
+.shop-shell { min-height: 100dvh; }
+.shop { width: min(1120px, 100%); margin-inline: auto; padding: 0 clamp(1rem, 4vw, 2rem) 3rem; display: grid; gap: 1.1rem; }
+.shop-head { display: grid; gap: 1rem; padding-top: clamp(1rem, 3vw, 1.75rem); }
+.shop-banner { width: 100%; height: auto; max-height: 280px; aspect-ratio: 8 / 3; object-fit: cover; border-radius: var(--radius); border: 1px solid var(--line); }
+.shop-brand { display: flex; align-items: center; gap: 1rem; min-width: 0; }
+.shop-logo { width: 72px; height: 72px; flex: none; border-radius: 50%; object-fit: cover; border: 1px solid var(--bronze-lo); background: var(--surface); }
+.shop-logo-empty { display: grid; place-items: center; font: 600 1.8rem var(--font-body); color: var(--bronze-hi); }
+.shop-title { min-width: 0; }
+.shop-title h1 { margin: 0; overflow-wrap: anywhere; }
+.shop-title p { margin: 0.1rem 0 0; }
+.shop-cta { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.chips-nav { display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.3rem; scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
+.chips-nav a { flex: none; padding: 0.5rem 1rem; border: 1px solid var(--line); border-radius: 999px; text-decoration: none; font-size: 0.9rem; white-space: nowrap; }
+.chips-nav a:hover { border-color: var(--bronze); }
+.chips-nav a[aria-current='page'] { background: var(--gold-grad); color: #1a110a; border-color: transparent; font-weight: 600; }
+.chips-sub a { font-size: 0.82rem; padding: 0.35rem 0.8rem; }
+.shop-filters { display: grid; gap: 0.7rem; }
+.filters { border: 1px solid var(--line); border-radius: 12px; padding: 0 1rem 1rem; }
+.filters summary { cursor: pointer; padding: 0.8rem 0; color: var(--bronze-hi); font-weight: 500; }
+.filters .grid-2 { margin-bottom: 0.8rem; }
+.active-filters a.badge { text-decoration: none; }
+.shop-grid { list-style: none; margin: 0; padding: 0; display: grid; gap: 1rem 0.75rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (min-width: 720px) { .shop-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem 1rem; } }
+@media (min-width: 1000px) { .shop-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.shop-card-link { display: grid; gap: 0.6rem; text-decoration: none; }
+.shop-card-media { position: relative; aspect-ratio: 3 / 4; border-radius: 12px; overflow: hidden; background: var(--surface-2); border: 1px solid var(--line); }
+.shop-card-media img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.4s ease; }
+.shop-card-link:hover img { transform: scale(1.03); }
+.shop-card-out img { filter: grayscale(0.6) brightness(0.8); }
+.shop-card-empty { display: grid; place-items: center; height: 100%; font: 600 3rem var(--font-body); color: var(--bronze-deep); }
+.shop-badge { position: absolute; left: 0.5rem; bottom: 0.5rem; padding: 0.2rem 0.65rem; border-radius: 999px; font-size: 0.72rem; background: rgba(7, 8, 9, 0.85); border: 1px solid var(--bronze-lo); color: var(--bronze-hi); }
+.shop-badge-sold_out { border-color: #5a352f; color: var(--danger); }
+.shop-off { position: absolute; top: 0.5rem; right: 0.5rem; padding: 0.2rem 0.6rem; border-radius: 8px; font-size: 0.75rem; font-weight: 600; background: var(--gold-grad); color: #1a110a; }
+.shop-card-body h3 { margin: 0; font-size: 0.95rem; font-weight: 500; line-height: 1.3; overflow-wrap: anywhere; }
+.shop-price { margin: 0.15rem 0 0; font-size: 0.95rem; }
+.shop-price s { color: var(--muted); font-size: 0.85rem; margin-right: 0.3rem; }
+.shop-price strong { color: var(--copper); font-weight: 600; }
+.shop-sizes { margin: 0.1rem 0 0; font-size: 0.75rem; color: var(--muted); }
+.shop-foot { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--line); display: grid; gap: 0.3rem; }
+.shop-foot p { margin: 0; }
+
+/* página da peça */
+.crumbs { padding-top: 1rem; font-size: 0.9rem; color: var(--muted); overflow-wrap: anywhere; }
+.pp-grid { display: grid; gap: 1.5rem; }
+@media (min-width: 860px) { .pp-grid { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); align-items: start; } .pp-info { position: sticky; top: 1rem; } }
+.pp-gallery { display: flex; gap: 0.6rem; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; border-radius: var(--radius); }
+.pp-photo { flex: 0 0 100%; width: 100%; height: auto; aspect-ratio: 3 / 4; object-fit: cover; scroll-snap-align: center; border-radius: var(--radius); border: 1px solid var(--line); background: var(--surface-2); }
+.pp-photo-empty { display: grid; place-items: center; font: 600 5rem var(--font-body); color: var(--bronze-deep); }
+.pp-price { margin: 0.3rem 0 0.5rem; font-size: 1.4rem; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem; }
+.pp-price s { color: var(--muted); font-size: 1rem; }
+.pp-price strong { color: var(--copper); font-weight: 600; }
+.pp-off { position: static; }
+.pp-desc { white-space: pre-line; margin: 0; }
+.size-pill { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 40px; padding: 0 0.85rem; border: 1px solid var(--line); border-radius: 999px; font-size: 0.9rem; }
+.shop-badge-inline { display: inline-block; padding: 0.2rem 0.7rem; border-radius: 999px; font-size: 0.78rem; border: 1px solid var(--bronze-lo); color: var(--bronze-hi); }
+.shop-badge-inline.shop-badge-sold_out { border-color: #5a352f; color: var(--danger); }
+.waitlist { border-color: var(--bronze-lo); }
+.waitlist h2 { margin: 0; }
