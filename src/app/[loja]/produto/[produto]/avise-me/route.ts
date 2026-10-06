@@ -27,6 +27,12 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   if (supabase) await supabase.rpc('register_interest_click', { p_store: loja, p_product: produto }) // falha de contagem não impede o contato
 
   if (!page.store.whatsapp) return back('?aviso=sem-whatsapp')
-  const text = customerMessage(page.product.stock_label, page.product.name, productUrl(base, page.store.slug, page.product.slug))
+  // tamanho escolhido na página (só vale se for um dos tamanhos da peça)
+  let size = ''
+  try {
+    const raw = String((await request.formData()).get('size') ?? '').trim()
+    size = page.product.sizes.find((s) => s.toLowerCase() === raw.toLowerCase()) ?? ''
+  } catch { /* sem formulário: segue sem tamanho */ }
+  const text = customerMessage(page.product.stock_label, page.product.name, productUrl(base, page.store.slug, page.product.slug), undefined, size)
   return NextResponse.redirect(whatsappUrl(page.store.whatsapp, text), 303)
 }

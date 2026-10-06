@@ -12,16 +12,20 @@ export const productUrl = (siteUrl: string, storeSlug: string, productSlug: stri
 
 type Interest = 'sold_out' | 'reserved' | 'available' | 'low'
 
-/** Mensagem que a CLIENTE manda para a loja. O texto muda conforme a situação da peça. */
-export function customerMessage(label: Interest, productName: string, link: string, price?: number): string {
+/** Mensagem que a CLIENTE manda para a loja. O texto muda conforme a situação da peça; o tamanho escolhido entra se houver. */
+export function customerMessage(label: Interest, productName: string, link: string, price?: number, size?: string): string {
+  const sz = size ? ` no tamanho ${size}` : ''
   if (label === 'sold_out') {
-    return `Oi! A peça "${productName}" está esgotada, mas tenho interesse em receber um aviso quando ela estiver disponível novamente. ${link}`
+    return `Oi! A peça "${productName}"${sz} está esgotada, mas tenho interesse em receber um aviso quando ela estiver disponível novamente. ${link}`
   }
   if (label === 'reserved') {
-    return `Oi! A peça "${productName}" está reservada, mas tenho interesse caso ela fique disponível. Pode me avisar? ${link}`
+    return `Oi! A peça "${productName}"${sz} está reservada, mas tenho interesse caso ela fique disponível. Pode me avisar? ${link}`
   }
-  return `Oi! Tenho interesse na peça "${productName}"${price !== undefined ? ` (${formatBRL(price)})` : ''}. ${link}`
+  return `Oi! Tenho interesse na peça "${productName}"${price !== undefined ? ` (${formatBRL(price)})` : ''}${sz}. ${link}`
 }
+
+/** Dúvida geral sobre a peça (botão secundário). */
+export const questionMessage = (productName: string, link: string) => `Oi! Tenho uma dúvida sobre a peça "${productName}". ${link}`
 
 /** Mensagem que a LOJA manda para quem estava esperando. */
 export function restockMessage(customerName: string, productName: string, storeName: string, link: string, size?: string | null): string {

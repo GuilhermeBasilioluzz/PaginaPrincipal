@@ -1,6 +1,6 @@
 import { cache } from 'react'
 import { createPublicClient } from './supabase/public'
-import type { StockLabel } from './catalog'
+import type { CatalogProduct, StockLabel } from './catalog'
 
 export type CatalogProductPage = {
   store: { slug: string; name: string; whatsapp: string | null; instagram_handle: string | null; logo_path: string | null }
@@ -9,6 +9,7 @@ export type CatalogProductPage = {
     sizes: string[]; stock_label: StockLabel; published_at: string
   }
   images: { path: string; kind: string; alt: string | null }[]
+  category: { name: string; slug: string; parent_name: string | null; parent_slug: string | null } | null
   collections: { name: string; slug: string }[]
   interest_open: boolean
 }
@@ -20,4 +21,14 @@ export const getCatalogProduct = cache(async (storeSlug: string, productSlug: st
   const { data, error } = await supabase.rpc('catalog_product', { p_slug: storeSlug, p_product: productSlug })
   if (error || !data) return null
   return data as CatalogProductPage
+})
+
+export type RelatedProduct = Omit<CatalogProduct, 'total'> & { score: number }
+
+/** "Você também pode gostar": mesma coleção, categoria e cor (ver catalog_related). */
+export const getCatalogRelated = cache(async (storeSlug: string, productSlug: string): Promise<RelatedProduct[]> => {
+  const supabase = createPublicClient()
+  if (!supabase) return []
+  const { data, error } = await supabase.rpc('catalog_related', { p_slug: storeSlug, p_product: productSlug, p_limit: 8 })
+  return error ? [] : ((data ?? []) as RelatedProduct[])
 })

@@ -1,15 +1,20 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { STOCK_BADGE, discountPercent, sortSizes } from '@/lib/catalog'
-import { publicUrl } from '@/lib/images'
-import { customerMessage, productUrl } from '@/lib/interest'
+import { ProductCard } from '@/components/catalog/ProductCard'
+import { ProductActions } from '@/components/catalog/ProductActions'
+import { ProductGallery } from '@/components/catalog/ProductGallery'
+import { ShareBar } from '@/components/catalog/ShareBar'
+import { STOCK_BADGE, discountPercent } from '@/lib/catalog'
+import { publicUrl, thumbPath } from '@/lib/images'
+import { productUrl } from '@/lib/interest'
+import { breadcrumbJsonLd, productJsonLd, safeJson } from '@/lib/jsonld'
 import { formatBRL } from '@/lib/money'
-import { getCatalogProduct } from '@/lib/publicProduct'
+import { getCatalogProduct, getCatalogRelated } from '@/lib/publicProduct'
+import { shareText } from '@/lib/share'
 import { getSupabaseEnv, siteUrl } from '@/lib/supabase/env'
-import { instagramUrl, whatsappUrl } from '@/lib/storeSettings'
 
-type Props = { params: Promise<{ loja: string; produto: string }>; searchParams: Promise<{ aviso?: string }> }
+type Props = { params: Promise<{ loja: string; produto: string }> }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { loja, produto } = await params
@@ -29,34 +34,42 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default async function ProductPage({ params, searchParams }: Props) {
-  const [{ loja, produto }, sp] = await Promise.all([params, searchParams])
-  const page = await getCatalogProduct(loja, produto)
+export default async function ProductPage({ params }: Props) {
+  const { loja, produto } = await params
+  const [page, related] = await Promise.all([getCatalogProduct(loja, produto), getCatalogRelated(loja, produto)])
   if (!page) notFound()
-  const { store, product: p, images, collections } = page
+  const { store, product: p, images, collections, category } = page
   const supabaseUrl = getSupabaseEnv()?.url ?? ''
-  const link = productUrl(siteUrl(), store.slug, p.slug)
+  const site = siteUrl()
+  const link = productUrl(site, store.slug, p.slug)
+  const price = p.promo_price !== null && p.promo_price < p.price ? p.promo_price : p.price
   const off = discountPercent(p.price, p.promo_price)
   const badge = STOCK_BADGE[p.stock_label]
-  const buyable = p.stock_label === 'available' || p.stock_label === 'low'
-  const interestHref = store.whatsapp ? whatsappUrl(store.whatsapp, customerMessage(p.stock_label, p.name, link, p.promo_price ?? p.price)) : null
+
+  const gallery = images.map((img, i) => ({ src: publicUrl(supabaseUrl, img.path), thumb: publicUrl(supabaseUrl, thumbPath(img.path)), alt: img.alt || `${p.name} — foto ${i + 1}` }))
+  const crumbs = [
+    { name: store.name, url: `${site}/${store.slug}` },
+    ...(category?.parent_slug ? [{ name: category.parent_name!, url: `${site}/${store.slug}?categoria=${category.parent_slug}` }] : []),
+    ...(category ? [{ name: category.name, url: `${site}/${store.slug}?categoria=${category.slug}` }] : []),
+    { name: p.name, url: link },
+  ]
 
   return (
     <div className="shop">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJson(productJsonLd({
+        storeName: store.name, name: p.name, description: p.description, url: link, images: gallery.map((g) => g.src), color: p.color, price, label: p.stock_label,
+      })) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJson(breadcrumbJsonLd(crumbs)) }} />
+
       <nav className="crumbs" aria-label="Você está em">
-        <Link href={`/${store.slug}`} className="link">{store.name}</Link> › <span>{p.name}</span>
+        <Link href={`/${store.slug}`} className="link">{store.name}</Link>
+        {category?.parent_slug && <> › <Link href={`/${store.slug}?categoria=${category.parent_slug}`} className="link">{category.parent_name}</Link></>}
+        {category && <> › <Link href={`/${store.slug}?categoria=${category.slug}`} className="link">{category.name}</Link></>}
+        {' › '}<span>{p.name}</span>
       </nav>
 
       <div className="pp-grid">
-        <div className="pp-gallery" role="group" aria-label={`Fotos de ${p.name}`}>
-          {images.length === 0 ? (
-            <div className="pp-photo pp-photo-empty" aria-hidden="true">{p.name.charAt(0)}</div>
-          ) : images.map((img, i) => (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img key={img.path} className="pp-photo" src={publicUrl(supabaseUrl, img.path)} alt={img.alt || `${p.name} — foto ${i + 1}`}
-              width={960} height={1280} loading={i === 0 ? 'eager' : 'lazy'} fetchPriority={i === 0 ? 'high' : 'auto'} decoding="async" />
-          ))}
-        </div>
+        <ProductGallery images={gallery} name={p.name} />
 
         <div className="pp-info stack">
           <div>
@@ -69,44 +82,28 @@ export default async function ProductPage({ params, searchParams }: Props) {
             {badge && <span className={`shop-badge-inline shop-badge-${p.stock_label}`}>{badge}</span>}
           </div>
 
-          {p.color && <p className="muted small">Cor: <strong>{p.color}</strong></p>}
-          {p.sizes.length > 0 && (
-            <div>
-              <p className="field-label">Tamanhos</p>
-              <div className="chip-row">{sortSizes(p.sizes).map((s) => <span key={s} className="size-pill">{s}</span>)}</div>
-            </div>
-          )}
+          {p.color && <p className="muted small" style={{ margin: 0 }}>Cor: <strong>{p.color}</strong></p>}
+
+          <ProductActions storeSlug={store.slug} productSlug={p.slug} name={p.name} price={price} label={p.stock_label} sizes={p.sizes}
+            whatsapp={store.whatsapp} instagram={store.instagram_handle} interestOpen={page.interest_open} siteUrl={site} />
+
           {p.description && <p className="pp-desc">{p.description}</p>}
           {collections.length > 0 && (
-            <p className="small muted">Em: {collections.map((c, i) => <span key={c.slug}>{i > 0 && ', '}<Link href={`/${store.slug}/colecao/${c.slug}`} className="link">{c.name}</Link></span>)}</p>
+            <p className="small muted" style={{ margin: 0 }}>Em: {collections.map((c, i) => <span key={c.slug}>{i > 0 && ', '}<Link href={`/${store.slug}/colecao/${c.slug}`} className="link">{c.name}</Link></span>)}</p>
           )}
 
-          {buyable && (interestHref
-            ? <a href={interestHref} className="btn btn-primary" target="_blank" rel="noopener noreferrer">Tenho interesse — falar no WhatsApp</a>
-            : <p className="notice">Esta loja ainda não informou um WhatsApp.{store.instagram_handle && <> Fale com ela pelo <a className="link" href={instagramUrl(store.instagram_handle)} target="_blank" rel="noopener noreferrer">Instagram</a>.</>}</p>)}
-
-          {page.interest_open && (
-            <section className="card stack waitlist" aria-labelledby="avise-h">
-              <h2 id="avise-h">{p.stock_label === 'sold_out' ? 'Esta peça esgotou' : 'Esta peça está reservada'}</h2>
-              <p className="muted small">
-                {p.stock_label === 'sold_out'
-                  ? 'Quer ser avisada se ela voltar? Fale com a loja pelo WhatsApp: a mensagem já vai pronta.'
-                  : 'Se a reserva não se concretizar, a peça pode voltar. Peça para ser avisada pelo WhatsApp: a mensagem já vai pronta.'}
-              </p>
-              {interestHref ? (
-                <form action={`/${store.slug}/produto/${p.slug}/avise-me`} method="post">
-                  <button type="submit" className="btn btn-primary">🔔 Avise-me quando chegar</button>
-                </form>
-              ) : (
-                <p className="notice">Esta loja ainda não informou um WhatsApp.{store.instagram_handle && <> Fale com ela pelo <a className="link" href={instagramUrl(store.instagram_handle)} target="_blank" rel="noopener noreferrer">Instagram</a>.</>}</p>
-              )}
-              {sp.aviso === 'sem-whatsapp' && <p className="notice notice-error" role="alert">Não foi possível abrir o WhatsApp desta loja.</p>}
-            </section>
-          )}
-
-          <Link href={`/${store.slug}`} className="btn btn-ghost">← Ver mais peças</Link>
+          <ShareBar url={link} title={`${p.name} — ${store.name}`} text={shareText(store.name, p.name, price)} />
         </div>
       </div>
+
+      {related.length > 0 && (
+        <section className="stack" aria-labelledby="rel-h">
+          <h2 id="rel-h" className="eyebrow">Você também pode gostar</h2>
+          <ul className="shop-grid">
+            {related.map((r) => <ProductCard key={r.id} product={{ ...r, total: related.length }} storeSlug={store.slug} supabaseUrl={supabaseUrl} priority={false} />)}
+          </ul>
+        </section>
+      )}
 
       <footer className="shop-foot"><p className="muted small">Catálogo por <strong>Hyperion Systems</strong></p></footer>
     </div>

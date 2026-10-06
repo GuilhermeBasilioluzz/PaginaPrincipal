@@ -135,5 +135,19 @@ Entrada manual (print/foto do Story) e conexão oficial com a Meta alimentam a m
   mensagem pronta. Da lista dá para "reservar para ela" (a pessoa vira "venda" ao reservar). Dono/gerente apagam os dados a pedido (LGPD).
 - O aviso é **manual**: não há envio automático de WhatsApp. Cliques não identificam ninguém; a identificação vem da conversa.
 
+## Decisões (ETAPA 9 — página da peça)
+- **Uma consulta traz a peça** (fotos em ordem, categoria com a principal, coleções, situação) e **outra traz as relacionadas**; as duas
+  rodam em paralelo.
+- **"Você também pode gostar"** (`catalog_related`): afinidade por pontos (+3 mesma coleção publicada, +2 mesma categoria, +1 categoria
+  vizinha, +1 mesma cor), esgotadas por último, e completa com as mais novas para a vitrine não ficar vazia. Respeita ocultar esgotados.
+- **Galeria:** fotos deslizantes (funciona sem JavaScript), miniaturas, contador, setas do teclado e ampliação em tela cheia (`<dialog>`
+  nativo: Esc fecha). Foto principal com prioridade de carregamento; as outras sob demanda.
+- **Tamanho opcional:** a cliente escolhe o tamanho e ele entra na mensagem do WhatsApp e no "Avise-me" (só vale se for um tamanho da peça).
+- **Compartilhar sem pedir conta:** menu nativo do celular (só aparece onde o navegador suporta), WhatsApp para escolher o contato e
+  copiar link (com plano B para navegadores que bloqueiam a área de transferência). Cancelar o menu nativo não gera erro.
+- **SEO:** dados estruturados `Product` (preço em BRL, disponibilidade) e `BreadcrumbList`; o JSON é escapado para que texto da loja
+  nunca feche a tag `<script>`. Migalhas de pão visíveis (loja › categoria › subcategoria › peça).
+- Ícone do app (`icon.svg`, o H provisório) para a aba do navegador e favoritos.
+
 ## Próximo
-ETAPA 9: página completa do produto (galeria, relacionados, compartilhar, copiar link, SEO estruturado).
+ETAPA 10: multiatendente (convites, permissões, registro de quem alterou cada produto).
