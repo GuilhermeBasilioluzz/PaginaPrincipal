@@ -2,8 +2,9 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ProductCard } from './ProductCard'
 import {
-  CATALOG_PAGE_SIZE, SORTS, activeFilters, catalogHref, parseCatalogQuery, sortSizes, type CatalogQuery,
+  CATALOG_PAGE_SIZE, SORTS, activeFilters, applyEnabledFilters, catalogHref, parseCatalogQuery, sortSizes, type CatalogQuery,
 } from '@/lib/catalog'
+import { AUDIENCE_LABEL } from '@/lib/catalogFilters'
 import { getCatalogProducts, getCatalogStore } from '@/lib/publicCatalog'
 import { publicUrl } from '@/lib/images'
 import { getSupabaseEnv } from '@/lib/supabase/env'
@@ -15,10 +16,11 @@ export async function CatalogView({ slug, collectionSlug, searchParams }: { slug
   const catalog = await getCatalogStore(slug)
   if (!catalog) notFound()
   const { store } = catalog
-  const collection = collectionSlug ? catalog.collections.find((c) => c.slug === collectionSlug) : undefined
-  if (collectionSlug && !collection) notFound()
+  const fl = catalog.filters
+  const collection = fl.collection && collectionSlug ? catalog.collections.find((c) => c.slug === collectionSlug) : undefined
+  if (collectionSlug && !collection) notFound() // coleção desligada = página inexistente
 
-  const query = parseCatalogQuery(searchParams)
+  const query = applyEnabledFilters(parseCatalogQuery(searchParams), fl)
   const base = collection ? `/${store.slug}/colecao/${collection.slug}` : `/${store.slug}`
   const { items, total, failed } = await getCatalogProducts(store.slug, query, collection?.slug ?? '')
   const supabaseUrl = getSupabaseEnv()?.url ?? ''
@@ -29,7 +31,10 @@ export async function CatalogView({ slug, collectionSlug, searchParams }: { slug
   const parentSlug = selected ? (selected.parent_slug ?? selected.slug) : ''
   const subs = parentSlug ? catalog.categories.filter((c) => c.parent_slug === parentSlug && c.count > 0) : []
   const filters = activeFilters(base, query, selected?.name)
-  const panelOpen = !!(query.color || query.size || query.min !== null || query.max !== null || query.stock || query.sort !== 'new')
+  const audiences = fl.audience ? catalog.audiences.filter((a) => a.count > 0) : []
+  const styles = fl.style ? catalog.styles : []
+  const hasPanel = fl.color && catalog.colors.length > 0 || fl.size && catalog.sizes.length > 0 || fl.price || fl.sort || fl.stock || styles.length > 0
+  const panelOpen = !!(query.style || query.color || query.size || query.min !== null || query.max !== null || query.stock || query.sort !== 'new')
   const hasFilters = filters.length > 0
   const href = (o: Partial<CatalogQuery>) => catalogHref(base, query, { page: 1, ...o })
 
@@ -67,7 +72,7 @@ export async function CatalogView({ slug, collectionSlug, searchParams }: { slug
         </div>
       </header>
 
-      {catalog.collections.some((c) => c.count > 0) && (
+      {fl.collection && catalog.collections.some((c) => c.count > 0) && (
         <nav className="chips-nav" aria-label="Coleções">
           <Link href={`/${store.slug}`} aria-current={!collection ? 'page' : undefined}>Tudo</Link>
           {catalog.collections.filter((c) => c.count > 0).map((c) => (
@@ -85,41 +90,62 @@ export async function CatalogView({ slug, collectionSlug, searchParams }: { slug
       ) : (
         <>
           <form className="shop-filters" action={base} method="get" role="search">
-            <div className="row search">
-              <input type="search" name="q" defaultValue={query.q} placeholder="Buscar peças (vestido preto, calça jeans…)" aria-label="Buscar peças" />
-              <button type="submit" className="btn btn-primary">Buscar</button>
-            </div>
+            {fl.search && (
+              <div className="row search">
+                <input type="search" name="q" defaultValue={query.q} placeholder="Buscar peças (vestido preto, calça jeans…)" aria-label="Buscar peças" />
+                <button type="submit" className="btn btn-primary">Buscar</button>
+              </div>
+            )}
             {query.category && <input type="hidden" name="categoria" value={query.category} />}
+            {query.audience && <input type="hidden" name="publico" value={query.audience} />}
+            {hasPanel && (
             <details className="filters" open={panelOpen || undefined}>
               <summary>Filtrar e ordenar</summary>
               <div className="grid-2">
-                {catalog.colors.length > 0 && (
+                {styles.length > 0 && (
+                  <label className="field"><span className="field-label">Estilo</span>
+                    <select name="estilo" defaultValue={query.style}><option value="">Todos</option>{styles.map((s) => <option key={s.name}>{s.name}</option>)}</select></label>
+                )}
+                {fl.color && catalog.colors.length > 0 && (
                   <label className="field"><span className="field-label">Cor</span>
                     <select name="cor" defaultValue={query.color}><option value="">Todas</option>{catalog.colors.map((c) => <option key={c}>{c}</option>)}</select></label>
                 )}
-                {catalog.sizes.length > 0 && (
+                {fl.size && catalog.sizes.length > 0 && (
                   <label className="field"><span className="field-label">Tamanho</span>
                     <select name="tamanho" defaultValue={query.size}><option value="">Todos</option>{sortSizes(catalog.sizes).map((s) => <option key={s}>{s}</option>)}</select></label>
                 )}
-                <label className="field"><span className="field-label">Preço mínimo (R$)</span>
-                  <input name="min" inputMode="decimal" defaultValue={query.min ?? ''} placeholder={catalog.price_min !== null ? String(Math.floor(catalog.price_min)) : ''} /></label>
-                <label className="field"><span className="field-label">Preço máximo (R$)</span>
-                  <input name="max" inputMode="decimal" defaultValue={query.max ?? ''} placeholder={catalog.price_max !== null ? String(Math.ceil(catalog.price_max)) : ''} /></label>
-                <label className="field"><span className="field-label">Ordenar por</span>
-                  <select name="ordem" defaultValue={query.sort}>{Object.entries(SORTS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></label>
-                <label className="check"><input type="checkbox" name="estoque" value="1" defaultChecked={query.stock} /> Mostrar só o que tem em estoque</label>
+                {fl.price && (
+                  <>
+                    <label className="field"><span className="field-label">Preço mínimo (R$)</span>
+                      <input name="min" inputMode="decimal" defaultValue={query.min ?? ''} placeholder={catalog.price_min !== null ? String(Math.floor(catalog.price_min)) : ''} /></label>
+                    <label className="field"><span className="field-label">Preço máximo (R$)</span>
+                      <input name="max" inputMode="decimal" defaultValue={query.max ?? ''} placeholder={catalog.price_max !== null ? String(Math.ceil(catalog.price_max)) : ''} /></label>
+                  </>
+                )}
+                {fl.sort && (
+                  <label className="field"><span className="field-label">Ordenar por</span>
+                    <select name="ordem" defaultValue={query.sort}>{Object.entries(SORTS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></label>
+                )}
+                {fl.stock && <label className="check"><input type="checkbox" name="estoque" value="1" defaultChecked={query.stock} /> Mostrar só o que tem em estoque</label>}
               </div>
               <div className="row"><button type="submit" className="btn btn-ghost">Aplicar</button></div>
             </details>
+            )}
           </form>
 
-          {tops.length > 0 && (
+          {audiences.length > 1 && (
+            <nav className="chips-nav" aria-label="Público">
+              <Link href={href({ audience: '' })} aria-current={!query.audience ? 'page' : undefined}>Todos</Link>
+              {audiences.map((a) => <Link key={a.value} href={href({ audience: a.value })} aria-current={query.audience === a.value ? 'page' : undefined}>{AUDIENCE_LABEL[a.value]}</Link>)}
+            </nav>
+          )}
+          {fl.category && tops.length > 0 && (
             <nav className="chips-nav" aria-label="Categorias">
               <Link href={href({ category: '' })} aria-current={!query.category ? 'page' : undefined}>Todas as categorias</Link>
               {tops.map((c) => <Link key={c.slug} href={href({ category: c.slug })} aria-current={query.category === c.slug ? 'page' : undefined}>{c.name}</Link>)}
             </nav>
           )}
-          {subs.length > 0 && (
+          {fl.category && subs.length > 0 && (
             <nav className="chips-nav chips-sub" aria-label="Subcategorias">
               {subs.map((c) => <Link key={c.slug} href={href({ category: c.slug })} aria-current={query.category === c.slug ? 'page' : undefined}>{c.name}</Link>)}
             </nav>

@@ -1,5 +1,6 @@
 import { parseBRL } from './money'
 import { searchTerm } from './products'
+import { AUDIENCE_LABEL, isAudience, type Audience, type CatalogFilters } from './catalogFilters'
 
 export const CATALOG_PAGE_SIZE = 24
 export const SORTS = { new: 'Mais novos', price_asc: 'Menor preço', price_desc: 'Maior preço', name: 'Nome (A–Z)' } as const
@@ -11,10 +12,10 @@ export const STOCK_BADGE: Record<StockLabel, string | null> = {
 }
 
 export type CatalogQuery = {
-  q: string; category: string; color: string; size: string
+  q: string; category: string; audience: '' | Audience; style: string; color: string; size: string
   min: number | null; max: number | null; stock: boolean; sort: SortKey; page: number
 }
-export const DEFAULT_QUERY: CatalogQuery = { q: '', category: '', color: '', size: '', min: null, max: null, stock: false, sort: 'new', page: 1 }
+export const DEFAULT_QUERY: CatalogQuery = { q: '', category: '', audience: '', style: '', color: '', size: '', min: null, max: null, stock: false, sort: 'new', page: 1 }
 
 type Raw = Record<string, string | string[] | undefined>
 const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) ?? ''
@@ -31,6 +32,8 @@ export function parseCatalogQuery(sp: Raw): CatalogQuery {
   return {
     q: searchTerm(first(sp.q)),
     category: /^[a-z0-9]+(-[a-z0-9]+)*$/.test(category) && category.length <= 60 ? category : '',
+    audience: isAudience(first(sp.publico)) ? (first(sp.publico) as Audience) : '',
+    style: clean(first(sp.estilo), 30),
     color: clean(first(sp.cor), 30),
     size: clean(first(sp.tamanho), 12),
     min, max,
@@ -48,6 +51,8 @@ export function catalogHref(path: string, query: CatalogQuery, override: Partial
   const u = new URLSearchParams()
   if (q.q) u.set('q', q.q)
   if (q.category) u.set('categoria', q.category)
+  if (q.audience) u.set('publico', q.audience)
+  if (q.style) u.set('estilo', q.style)
   if (q.color) u.set('cor', q.color)
   if (q.size) u.set('tamanho', q.size)
   if (q.min !== null) u.set('min', num(q.min))
@@ -66,6 +71,8 @@ export function activeFilters(path: string, q: CatalogQuery, categoryName?: stri
   const drop = (o: Partial<CatalogQuery>) => catalogHref(path, q, { ...o, page: 1 })
   if (q.q) out.push({ label: `Busca: ${q.q}`, href: drop({ q: '' }) })
   if (q.category) out.push({ label: categoryName ?? q.category, href: drop({ category: '' }) })
+  if (q.audience) out.push({ label: AUDIENCE_LABEL[q.audience], href: drop({ audience: '' }) })
+  if (q.style) out.push({ label: `Estilo: ${q.style}`, href: drop({ style: '' }) })
   if (q.color) out.push({ label: `Cor: ${q.color}`, href: drop({ color: '' }) })
   if (q.size) out.push({ label: `Tamanho: ${q.size}`, href: drop({ size: '' }) })
   if (q.min !== null || q.max !== null) {
@@ -105,6 +112,9 @@ export type CatalogStore = {
     logo_path: string | null; banner_path: string | null; accent_color: string | null
   }
   total: number
+  filters: CatalogFilters
+  audiences: { value: Audience; count: number }[]
+  styles: { name: string; count: number }[]
   categories: { name: string; slug: string; parent_slug: string | null; count: number }[]
   collections: { name: string; slug: string; automatic: boolean; count: number }[]
   colors: string[]; sizes: string[]; price_min: number | null; price_max: number | null
@@ -113,4 +123,21 @@ export type CatalogStore = {
 export type CatalogProduct = {
   id: string; name: string; slug: string; price: number; promo_price: number | null; color: string | null
   sizes: string[]; is_featured: boolean; published_at: string; stock_label: StockLabel; cover_path: string | null; total: number
+}
+
+/** Zera na consulta o que a loja desligou: a URL é entrada do usuário e não pode burlar a seleção de filtros. */
+export function applyEnabledFilters(q: CatalogQuery, f: CatalogFilters): CatalogQuery {
+  return {
+    ...q,
+    q: f.search ? q.q : '',
+    category: f.category ? q.category : '',
+    audience: f.audience ? q.audience : '',
+    style: f.style ? q.style : '',
+    color: f.color ? q.color : '',
+    size: f.size ? q.size : '',
+    min: f.price ? q.min : null,
+    max: f.price ? q.max : null,
+    stock: f.stock ? q.stock : false,
+    sort: f.sort ? q.sort : 'new',
+  }
 }

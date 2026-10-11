@@ -7,27 +7,29 @@ import { saveProductAction } from '@/app/(app)/app/[store]/produtos/actions'
 import { LETTER_SIZES, NUMBER_SIZES } from '@/lib/sizes'
 import { COLOR_SUGGESTIONS } from '@/lib/products'
 import { STATUS_LABEL } from '@/lib/dashboard'
+import { AUDIENCE_LABEL, type Audience, type CatalogFilters } from '@/lib/catalogFilters'
 
 export type ProductFormValues = {
   name: string; price: string; promo: string; quantity: string; color: string; sku: string
   description: string; video: string; status: string; category: string; featured: boolean
-  sizes: string[]; sizesExtra: string
+  sizes: string[]; sizesExtra: string; audience: string; styles: string[]
 }
 
 export const EMPTY_PRODUCT: ProductFormValues = {
   name: '', price: '', promo: '', quantity: '', color: '', sku: '', description: '', video: '',
-  status: 'available', category: '', featured: false, sizes: [], sizesExtra: '',
+  status: 'available', category: '', featured: false, sizes: [], sizesExtra: '', audience: '', styles: [],
 }
 
 const STATUS_OPTIONS = ['available', 'reserved', 'sold', 'unavailable'] as const
 
-export function ProductForm({ storeId, slug, productId, initial, categories, archived }: {
+export function ProductForm({ storeId, slug, productId, initial, categories, archived, filters }: {
   storeId: string
   slug: string
   productId: string | null
   initial: ProductFormValues
   categories: { id: string; name: string }[]
   archived: boolean
+  filters: CatalogFilters
 }) {
   const [state, action] = useActionState(saveProductAction.bind(null, storeId, slug, productId, archived), undefined)
   const [v, setV] = useState(initial)
@@ -35,7 +37,10 @@ export function ProductForm({ storeId, slug, productId, initial, categories, arc
   const text = (k: 'name' | 'price' | 'promo' | 'quantity' | 'color' | 'sku' | 'video' | 'description' | 'sizesExtra') =>
     ({ name: k, value: v[k], onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => set(k, e.target.value) })
   const toggleSize = (s: string) => set('sizes', v.sizes.includes(s) ? v.sizes.filter((x) => x !== s) : [...v.sizes, s])
-  const advancedFilled = !!(v.promo || v.sku || v.video || v.description || v.featured || v.category)
+  const audienceChoices: Audience[] = filters.audiences
+  const toggleStyle = (s: string) => set('styles', v.styles.includes(s) ? v.styles.filter((x) => x !== s) : [...v.styles, s])
+  const styleChoices = [...filters.styles, ...v.styles.filter((s) => !filters.styles.some((x) => x.toLowerCase() === s.toLowerCase()))]
+  const advancedFilled = !!(v.promo || v.sku || v.video || v.description || v.featured || v.category || v.styles.length)
 
   return (
     <form action={action} className="stack-lg">
@@ -58,6 +63,17 @@ export function ProductForm({ storeId, slug, productId, initial, categories, arc
           </div>
           <Field label="Outros tamanhos" placeholder="48, 50, Plus" hint="Separe por vírgula." {...text('sizesExtra')} />
         </fieldset>
+
+        {filters.audience && (
+          <label className="field">
+            <span className="field-label">Público</span>
+            <select name="audience" value={v.audience || audienceChoices[0]} onChange={(e) => set('audience', e.target.value)}>
+              {[...new Set([...audienceChoices, ...(v.audience ? [v.audience as Audience] : [])])].map((a) => <option key={a} value={a}>{AUDIENCE_LABEL[a]}</option>)}
+            </select>
+          </label>
+        )}
+        {/* filtro de público desligado: a peça nova nasce no público da loja */}
+        {!filters.audience && !productId && <input type="hidden" name="audience" value={audienceChoices[0]} />}
 
         <div className="grid-2">
           <label className="field">
@@ -88,6 +104,20 @@ export function ProductForm({ storeId, slug, productId, initial, categories, arc
                 {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
             </label>
+          )}
+          {filters.style && styleChoices.length > 0 && (
+            <fieldset className="chips">
+              <legend className="field-label">Estilo</legend>
+              <input type="hidden" name="styles_present" value="1" />
+              <div className="chip-row">
+                {styleChoices.map((s) => (
+                  <label key={s} className={`chip${v.styles.includes(s) ? ' chip-on' : ''}`}>
+                    <input type="checkbox" name="styles" value={s} checked={v.styles.includes(s)} onChange={() => toggleStyle(s)} />
+                    {s}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
           )}
           <Field label="Código interno (SKU)" maxLength={40} autoComplete="off" {...text('sku')} />
           <label className="field">

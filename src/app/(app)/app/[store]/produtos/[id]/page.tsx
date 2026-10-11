@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { ProductForm, type ProductFormValues } from '@/components/ProductForm'
 import { ConfirmButton } from '@/components/ConfirmButton'
 import { SubmitButton } from '@/components/ui'
+import { normalizeFilters } from '@/lib/catalogFilters'
 import { can } from '@/lib/permissions'
 import { formatInput } from '@/lib/money'
 import { splitSizes } from '@/lib/sizes'
@@ -34,7 +35,7 @@ export default async function EditProductPage({ params, searchParams }: {
   const supabase = await createClient()
   const { data: p } = await supabase.from('products').select('*').eq('id', id).eq('store_id', store.id).maybeSingle()
   if (!p) notFound()
-  const [{ data: inv }, { data: categories }, { data: photos }, { data: manualCols }, { data: memberOf }, { data: activeRes }, { data: history }, { data: log }] = await Promise.all([
+  const [{ data: inv }, { data: categories }, { data: photos }, { data: manualCols }, { data: memberOf }, { data: activeRes }, { data: history }, { data: log }, { data: st }] = await Promise.all([
     supabase.from('inventory').select('quantity').eq('product_id', id).maybeSingle(),
     supabase.from('categories').select('id, name').eq('store_id', store.id).order('position').order('name'),
     supabase.from('product_images').select('id, path, kind, alt').eq('product_id', id).order('position'),
@@ -43,6 +44,7 @@ export default async function EditProductPage({ params, searchParams }: {
     supabase.from('reservations').select('quantity, expires_at').eq('product_id', id).in('status', ['requested', 'confirmed']),
     supabase.rpc('store_stock_feed', { p_store: store.id, p_limit: 10, p_product: id }),
     supabase.rpc('store_activity', { p_store: store.id, p_actor: null, p_type: 'product', p_entity: id, p_limit: 10, p_offset: 0 }),
+    supabase.from('stores').select('catalog_filters').eq('id', store.id).maybeSingle(),
   ])
   const who = new Map<string, string>()
   const ids = [p.created_by, p.updated_by].filter((x): x is string => !!x)
@@ -59,8 +61,9 @@ export default async function EditProductPage({ params, searchParams }: {
     name: p.name, price: formatInput(p.price), promo: formatInput(p.promo_price), quantity: String(inv?.quantity ?? 0),
     color: p.color ?? '', sku: p.sku ?? '', description: p.description ?? '', video: p.video_url ?? '',
     status: p.status === 'archived' ? 'unavailable' : p.status, category: p.category_id ?? '', featured: p.is_featured,
-    sizes: checked, sizesExtra: extra,
+    sizes: checked, sizesExtra: extra, audience: p.audience, styles: p.styles ?? [],
   }
+  const filters = normalizeFilters(st?.catalog_filters)
   const editable = can(role, 'edit_products') && store.is_active
   const archived = p.status === 'archived'
 
@@ -78,7 +81,7 @@ export default async function EditProductPage({ params, searchParams }: {
         </p>
         {archived && <p className="notice notice-error">Este produto está arquivado e fora do catálogo.</p>}
         {editable
-          ? <ProductForm storeId={store.id} slug={slug} productId={id} initial={initial} categories={categories ?? []} archived={archived} />
+          ? <ProductForm storeId={store.id} slug={slug} productId={id} initial={initial} categories={categories ?? []} archived={archived} filters={filters} />
           : <p className="notice">Você só pode consultar este produto.</p>}
       </div>
 

@@ -166,3 +166,11 @@ Entrada manual (print/foto do Story) e conexão oficial com a Meta alimentam a m
 
 ## Próximo
 ETAPA 11: integração com o Instagram (conexão oficial, antes de implementar é preciso validar a documentação da Meta).
+
+## ETAPA 10.1 — Filtros do catálogo por loja (público, estilo, seleção de filtros)
+
+- `products.audience` (`feminine|masculine|unisex|kids`, padrão `unisex`) e `products.styles` (até 8 rótulos). O **tipo de peça** (blusas, calças, acessórios…) continua sendo a **categoria**; `add_categories` cria as sugeridas por tipo de loja.
+- `stores.catalog_filters` (jsonb validado por `private.valid_catalog_filters`): 10 chaves booleanas (busca, coleção, categoria, público, estilo, cor, tamanho, preço, estoque, ordenação) + lista de públicos da loja (1–4) + lista de estilos (≤12). Só o **dono** altera (GRANT + RLS já existentes); a mudança entra no histórico.
+- Feminino/Masculino incluem as peças unissex; Unissex e Infantil só as próprias. A busca de texto entende "feminino", "infantil" e os estilos.
+- **Filtro desligado é ignorado também na URL** (`applyEnabledFilters`): a seleção não é só visual. Loja só feminina: o campo "Público" some do cadastro e a peça nova nasce como Feminino.
+- Edição em lote no banco (`bulk_update_products`, até 200 peças, respeitando o RLS) já pronta; a tela de seleção em massa fica para uma etapa seguinte.

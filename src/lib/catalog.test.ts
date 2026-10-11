@@ -6,7 +6,7 @@ import { brandingPath, isValidBrandingPath } from './images'
 describe('parseCatalogQuery', () => {
   it('lê os filtros', () => {
     const q = parseCatalogQuery({ q: 'vestido preto', categoria: 'vestidos', cor: 'Verde', tamanho: 'M', min: '50,5', max: '200', estoque: '1', ordem: 'price_asc', pagina: '3' })
-    expect(q).toEqual({ q: 'vestido preto', category: 'vestidos', color: 'Verde', size: 'M', min: 50.5, max: 200, stock: true, sort: 'price_asc', page: 3 })
+    expect(q).toEqual({ q: 'vestido preto', category: 'vestidos', audience: '', style: '', color: 'Verde', size: 'M', min: 50.5, max: 200, stock: true, sort: 'price_asc', page: 3 })
   })
   it('tudo ausente = padrão', () => {
     expect(parseCatalogQuery({})).toEqual(DEFAULT_QUERY)

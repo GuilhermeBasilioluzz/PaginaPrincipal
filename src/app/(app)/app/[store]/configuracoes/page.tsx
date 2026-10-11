@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { BrandingUploader } from '@/components/BrandingUploader'
 import { StoreSettingsForm } from '@/components/StoreSettingsForm'
+import { CatalogFiltersForm } from '@/components/CatalogFiltersForm'
+import { normalizeFilters } from '@/lib/catalogFilters'
 import { can } from '@/lib/permissions'
 import { getMembership } from '@/lib/session'
 import { createClient } from '@/lib/supabase/server'
@@ -19,7 +21,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ store
 
   const supabase = await createClient()
   const { data: s } = await supabase.from('stores')
-    .select('name, tagline, description, whatsapp, instagram_handle, address, opening_hours, accent_color, catalog_enabled, hide_sold_out, logo_path, banner_path')
+    .select('name, tagline, description, whatsapp, instagram_handle, address, opening_hours, accent_color, catalog_enabled, hide_sold_out, catalog_filters, logo_path, banner_path')
     .eq('id', store.id).maybeSingle()
   if (!s) notFound()
   const catalogUrl = `${siteUrl()}/${store.slug}`
@@ -53,6 +55,12 @@ export default async function SettingsPage({ params }: { params: Promise<{ store
             instagram: s.instagram_handle ? `@${s.instagram_handle}` : '', address: s.address ?? '', hours: s.opening_hours ?? '',
             accent: s.accent_color ?? '', catalogEnabled: s.catalog_enabled, hideSoldOut: s.hide_sold_out,
           }} />
+        </div>
+      )}
+
+      {owner && (
+        <div className="card" id="filtros">
+          <CatalogFiltersForm storeId={store.id} slug={slug} initial={normalizeFilters(s.catalog_filters)} />
         </div>
       )}
     </div>

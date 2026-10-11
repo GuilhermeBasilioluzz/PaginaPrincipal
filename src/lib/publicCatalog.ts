@@ -18,6 +18,7 @@ export async function getCatalogProducts(slug: string, q: CatalogQuery, collecti
     p_slug: slug, p_q: q.q, p_category: q.category, p_collection: collection, p_color: q.color, p_size: q.size,
     p_min: q.min, p_max: q.max, p_in_stock: q.stock, p_sort: q.sort,
     p_limit: CATALOG_PAGE_SIZE, p_offset: (q.page - 1) * CATALOG_PAGE_SIZE,
+    p_audience: q.audience, p_style: q.style,
   })
   if (error) return { items: [], total: 0, failed: true }
   const items = (data ?? []) as CatalogProduct[]

@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { parseBRL } from './money'
 import { parseSizes, MAX_SIZES } from './sizes'
 import { slugify } from './slug'
+import { AUDIENCES, MAX_PRODUCT_STYLES, cleanStyles } from './catalogFilters'
 
 export const EDITABLE_STATUS = ['available', 'reserved', 'sold', 'unavailable'] as const
 export const PAGE_SIZE = 20
@@ -38,6 +39,8 @@ export const productFormSchema = z
     status: z.enum(EDITABLE_STATUS).optional(),
     category: z.string().optional().refine((v) => !v || /^[0-9a-f-]{36}$/i.test(v), 'Categoria inválida.'),
     featured: z.boolean(),
+    audience: z.enum(AUDIENCES).optional(),
+    styles: z.array(z.string()).max(MAX_PRODUCT_STYLES, `No máximo ${MAX_PRODUCT_STYLES} estilos por peça.`),
     sizes: z.array(z.string().trim().min(1).max(12, 'Cada tamanho pode ter até 12 caracteres.')).max(MAX_SIZES, `No máximo ${MAX_SIZES} tamanhos.`),
   })
   .superRefine((v, ctx) => {
@@ -49,7 +52,7 @@ export const productFormSchema = z
 export type ProductPayload = {
   name: string; slug_base: string; description: string; price: number; promo_price: number | null
   category_id: string; color: string; sizes: string[]; sku: string; video_url: string
-  status?: string; featured: boolean; quantity: number
+  status?: string; featured: boolean; quantity: number; audience?: string; styles?: string[]
 }
 
 /** Lê o FormData do formulário e devolve o payload ou a primeira mensagem de erro. */
@@ -67,6 +70,8 @@ export function readProductForm(fd: FormData, opts: { keepStatus?: boolean } = {
     status: opts.keepStatus ? undefined : text('status') || undefined,
     category: text('category'),
     featured: fd.get('featured') === 'on',
+    audience: text('audience') || undefined,
+    styles: cleanStyles(fd.getAll('styles').map(String)),
     sizes: parseSizes(fd.getAll('sizes').map(String), text('sizesExtra')),
   })
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? 'Dados inválidos.' }
@@ -87,6 +92,9 @@ export function readProductForm(fd: FormData, opts: { keepStatus?: boolean } = {
       ...(d.status ? { status: d.status } : {}),
       featured: d.featured,
       quantity: d.quantity,
+      // sem o campo no formulário (filtro desligado), o banco mantém o valor atual
+      ...(d.audience ? { audience: d.audience } : {}),
+      ...(fd.has('styles_present') ? { styles: d.styles } : {}),
     },
   }
 }
