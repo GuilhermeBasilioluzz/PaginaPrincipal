@@ -5,7 +5,9 @@ permanente, organizado, pesquisável e ligado ao estoque.
 
 > "Seus Stories duram 24 horas. Seu catálogo, não."
 
-Status: **ETAPAS 1 (banco multi-loja) e 2 (autenticação, loja e equipe) concluídas**. Veja [docs/ARQUITETURA.md](docs/ARQUITETURA.md).
+Status: **ETAPAS 1 a 10 concluídas** (banco multi-loja, login, painel, produtos, fotos, coleções, estoque ao vivo, catálogo público, página da peça e multiatendente).
+
+**Quer ver funcionando?** Siga [docs/PUBLICAR.md](docs/PUBLICAR.md): link de teste em cerca de 15 minutos. Veja [docs/ARQUITETURA.md](docs/ARQUITETURA.md).
 O projeto anterior (PromptForge) foi removido deste repositório; continua no histórico do git.
 
 ## Rodar o app

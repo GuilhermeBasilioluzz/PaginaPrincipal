@@ -20,4 +20,4 @@ export type TeamMember = {
 }
 
 /** Estado devolvido pelas ações de formulário (useActionState). */
-export type FormState = { error?: string; message?: string } | undefined
+export type FormState = { error?: string; message?: string; link?: string; whatsapp?: string } | undefined

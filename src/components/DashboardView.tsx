@@ -1,6 +1,7 @@
 import Link from 'next/link'
+import { describeActivity } from '@/lib/activity'
 import {
-  STATUS_LABEL, activityVerb, isEmptyStore, statusSegments, timeAgo, type Dashboard,
+  isEmptyStore, statusSegments, timeAgo, type Dashboard,
 } from '@/lib/dashboard'
 
 const nf = new Intl.NumberFormat('pt-BR')
@@ -94,11 +95,8 @@ export function DashboardView({ data, canEdit, now, newProductHref }: { data: Da
             <ul className="activity">
               {data.recent.map((r) => (
                 <li key={r.id}>
-                  <span className="muted small">{timeAgo(r.updated_at, now)}</span>
-                  <span>
-                    <strong>{r.actor || 'Alguém da equipe'}</strong> {activityVerb(r.created_at, r.updated_at)}{' '}
-                    <em>{r.name}</em> <span className="badge">{STATUS_LABEL[r.status]}</span>
-                  </span>
+                  <span className="muted small">{timeAgo(r.created_at, now)}</span>
+                  <span>{describeActivity({ action: r.action, entity_name: r.entity_name, details: r.details, actor_name: r.actor })}</span>
                 </li>
               ))}
             </ul>

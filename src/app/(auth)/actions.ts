@@ -47,10 +47,10 @@ export async function signUpAction(_: FormState, fd: FormData): Promise<FormStat
   const { data, error } = await supabase.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,
-    options: { data: { full_name: parsed.data.fullName }, emailRedirectTo: callbackUrl('/app') },
+    options: { data: { full_name: parsed.data.fullName }, emailRedirectTo: callbackUrl(safeNext(field(fd, 'next'))) },
   })
   if (error) return { error: authErrorMessage(error) }
-  if (data.session) redirect('/app') // confirmação de e-mail desligada no Supabase
+  if (data.session) redirect(safeNext(field(fd, 'next'))) // confirmação de e-mail desligada no Supabase
   return { message: 'Conta criada! Enviamos um link de confirmação para o seu e-mail. Clique nele para entrar.' }
 }
 

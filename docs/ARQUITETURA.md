@@ -149,5 +149,20 @@ Entrada manual (print/foto do Story) e conexão oficial com a Meta alimentam a m
   nunca feche a tag `<script>`. Migalhas de pão visíveis (loja › categoria › subcategoria › peça).
 - Ícone do app (`icon.svg`, o H provisório) para a aba do navegador e favoritos.
 
+## Decisões (ETAPA 10 — multiatendente)
+- **Convite por link** (o dono copia e manda no WhatsApp). O código tem 256 bits de aleatoriedade e **o banco guarda só o hash SHA-256**:
+  quem lê o banco não consegue montar um link. O link aparece **uma única vez**, na criação. Vale por prazo (1 a 30 dias) e por
+  número de pessoas (1 a 20), pode ser cancelado, e a pessoa que já é membro não gasta o convite. Só convida para gerente ou atendente
+  (dono se promove). Quem não tem conta cria uma e volta ao mesmo convite (o `next` do login/cadastro é validado contra redirecionamento aberto).
+- **Histórico de atividades** (`activity_logs`): gravado por **gatilhos** do banco (a equipe não escreve nem apaga). Registra produtos
+  (criado, editado com antes/depois do preço, situação, excluído), estoque, fotos, categorias, coleções, equipe, convites e configurações
+  da loja. **Dono e gerente veem tudo; atendente só as próprias ações** (RLS). Não grava dados pessoais de clientes: reservas e lista
+  de espera registram só a peça, então um pedido de exclusão (LGPD) não deixa rastro no histórico.
+- **Quem alterou cada produto:** a peça mostra quem cadastrou e quem alterou por último, com data e hora, mais o histórico dela.
+- **Permissões:** a tabela "Quem pode o quê" da tela é a mesma usada pelo código e um teste garante que bate com as regras reais.
+- O painel principal passou a mostrar as últimas atividades reais.
+- **Publicar:** `supabase/all_migrations.sql` (gerado por `scripts/build-sql.sh`; o teste falha se estiver desatualizado) e
+  `supabase/seed_demo.sql` (loja de demonstração). Passo a passo em `docs/PUBLICAR.md`.
+
 ## Próximo
-ETAPA 10: multiatendente (convites, permissões, registro de quem alterou cada produto).
+ETAPA 11: integração com o Instagram (conexão oficial, antes de implementar é preciso validar a documentação da Meta).

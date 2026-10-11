@@ -23,11 +23,12 @@ const schema = z.object({
   interest_clicks: n,
   stock: z.object({ low: n, out: n }).catch({ low: 0, out: 0 }),
   recent: z.array(z.object({
-    id: z.string(),
-    name: z.string(),
-    status: z.enum(['available', 'reserved', 'sold', 'unavailable', 'archived']).catch('available'),
+    id: z.coerce.number().catch(0),
     created_at: z.string(),
-    updated_at: z.string(),
+    action: z.string().catch(''),
+    entity_type: z.string().catch(''),
+    entity_name: z.string().nullable().catch(null),
+    details: z.record(z.string(), z.unknown()).catch({}),
     actor: z.string().nullable().catch(null),
   })).catch([]),
 })
@@ -74,9 +75,4 @@ export function timeAgo(iso: string, now: Date = new Date()): string {
   if (days === 1) return 'ontem'
   if (days < 7) return `há ${days} dias`
   return then.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
-}
-
-/** O que mostrar na linha de atividade: criado ou alterado. */
-export function activityVerb(created: string, updated: string): 'adicionou' | 'atualizou' {
-  return Math.abs(new Date(updated).getTime() - new Date(created).getTime()) < 5000 ? 'adicionou' : 'atualizou'
 }

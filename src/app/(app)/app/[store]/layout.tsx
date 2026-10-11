@@ -27,6 +27,7 @@ export default async function StoreLayout({ children, params }: {
           <Link href={`/app/${slug}/interessados`}>Interessadas</Link>
           <Link href={`/app/${slug}/colecoes`}>Coleções</Link>
           <Link href={`/app/${slug}/categorias`}>Categorias</Link>
+          <Link href={`/app/${slug}/atividades`}>Atividades</Link>
           <Link href={`/app/${slug}/equipe`}>Equipe</Link>
           <Link href={`/app/${slug}/configuracoes`}>Configurações</Link>
         </nav>

@@ -2,7 +2,7 @@
 export const RESERVED_SLUGS = [
   'app', 'admin', 'api', 'login', 'cadastro', 'entrar', 'loja', 'colecao', 'produto', 'static', 'assets',
   '_next', 'suporte', 'planos', 'auth', 'recuperar-senha', 'redefinir-senha', 'termos', 'privacidade',
-  'perfil', 'robots', 'sitemap',
+  'perfil', 'robots', 'sitemap', 'convite',
 ]
 
 /** Mesma regra do banco: 3 a 40 caracteres, letras minúsculas, números e hífen (não nas pontas). */

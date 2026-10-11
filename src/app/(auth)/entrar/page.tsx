@@ -14,7 +14,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
       )}
       <LoginForms next={safeNext(next)} />
       <p className="muted small">
-        Ainda não tem conta? <Link href="/cadastro" className="link">Criar conta</Link>
+        Ainda não tem conta? <Link href={safeNext(next) === '/app' ? '/cadastro' : `/cadastro?next=${encodeURIComponent(safeNext(next))}`} className="link">Criar conta</Link>
       </p>
     </>
   )

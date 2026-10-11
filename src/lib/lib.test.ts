@@ -4,7 +4,7 @@ import { slugify, slugProblem, RESERVED_SLUGS } from './slug'
 import { safeNext } from './safeNext'
 import { addMemberSchema, loginSchema, newPasswordSchema, signUpSchema, storeSchema } from './validation'
 import { authErrorMessage, dbErrorMessage } from './errors'
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
 
 describe('permissões (espelho do banco)', () => {
   it('dono faz tudo', () => {
@@ -55,7 +55,9 @@ describe('slug', () => {
     expect(slugProblem('entrar')).not.toBeNull()
   })
   it('a lista de reservados do app é a mesma do banco', () => {
-    const sql = readFileSync('supabase/migrations/20261004000005_reserved_slugs.sql', 'utf8')
+    // a definição mais recente da regra (a última migration de endereços reservados)
+    const files = readdirSync('supabase/migrations').filter((f) => f.includes('reserved_slugs')).sort()
+    const sql = readFileSync(`supabase/migrations/${files[files.length - 1]}`, 'utf8')
     const inSql = [...sql.matchAll(/'([a-z_-]+)'/g)].map((m) => m[1]).filter((w) => !w.startsWith('^'))
     for (const w of RESERVED_SLUGS) expect(inSql).toContain(w)
     expect(inSql.sort()).toEqual([...RESERVED_SLUGS].sort())
@@ -119,5 +121,23 @@ describe('mensagens de erro', () => {
     expect(dbErrorMessage({ message: 'already_member', code: '23505' })).toContain('já faz parte')
     expect(dbErrorMessage({ code: '42501', message: 'x' })).toContain('permissão')
     expect(dbErrorMessage({ code: '23505', message: 'duplicate key value violates unique constraint "stores_slug_key"' })).toContain('endereço')
+  })
+})
+
+import { siteUrl } from './supabase/env'
+describe('endereço do site', () => {
+  const keys = ['NEXT_PUBLIC_SITE_URL', 'VERCEL_PROJECT_PRODUCTION_URL', 'VERCEL_URL'] as const
+  const save = Object.fromEntries(keys.map((k) => [k, process.env[k]]))
+  const reset = () => { for (const k of keys) { if (save[k] === undefined) delete process.env[k]; else process.env[k] = save[k] } }
+  it('prefere o endereço configurado, depois o da Vercel, depois o local', () => {
+    for (const k of keys) delete process.env[k]
+    expect(siteUrl()).toBe('http://localhost:3000')
+    process.env.VERCEL_URL = 'meu-app-abc123.vercel.app'
+    expect(siteUrl()).toBe('https://meu-app-abc123.vercel.app')
+    process.env.VERCEL_PROJECT_PRODUCTION_URL = 'meu-app.vercel.app'
+    expect(siteUrl()).toBe('https://meu-app.vercel.app')
+    process.env.NEXT_PUBLIC_SITE_URL = 'https://loja.exemplo.com.br/'
+    expect(siteUrl()).toBe('https://loja.exemplo.com.br')
+    reset()
   })
 })

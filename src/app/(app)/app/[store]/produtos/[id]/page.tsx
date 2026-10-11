@@ -13,6 +13,7 @@ import { PhotoManager, type PhotoItem } from '@/components/PhotoManager'
 import { setProductCollectionsAction } from '../../colecoes/actions'
 import { adjustStockAction, setStockAction } from '../../estoque/actions'
 import { describeMovement, type FeedItem } from '@/lib/stock'
+import { describeActivity, type ActivityItem } from '@/lib/activity'
 import { STOCK_FLASH } from '@/lib/flash'
 import { timeAgo } from '@/lib/dashboard'
 import { archiveProductAction, deleteProductAction, duplicateProductAction, restoreProductAction } from '../actions'
@@ -33,7 +34,7 @@ export default async function EditProductPage({ params, searchParams }: {
   const supabase = await createClient()
   const { data: p } = await supabase.from('products').select('*').eq('id', id).eq('store_id', store.id).maybeSingle()
   if (!p) notFound()
-  const [{ data: inv }, { data: categories }, { data: photos }, { data: manualCols }, { data: memberOf }, { data: activeRes }, { data: history }] = await Promise.all([
+  const [{ data: inv }, { data: categories }, { data: photos }, { data: manualCols }, { data: memberOf }, { data: activeRes }, { data: history }, { data: log }] = await Promise.all([
     supabase.from('inventory').select('quantity').eq('product_id', id).maybeSingle(),
     supabase.from('categories').select('id, name').eq('store_id', store.id).order('position').order('name'),
     supabase.from('product_images').select('id, path, kind, alt').eq('product_id', id).order('position'),
@@ -41,7 +42,12 @@ export default async function EditProductPage({ params, searchParams }: {
     supabase.from('collection_products').select('collection_id').eq('product_id', id),
     supabase.from('reservations').select('quantity, expires_at').eq('product_id', id).in('status', ['requested', 'confirmed']),
     supabase.rpc('store_stock_feed', { p_store: store.id, p_limit: 10, p_product: id }),
+    supabase.rpc('store_activity', { p_store: store.id, p_actor: null, p_type: 'product', p_entity: id, p_limit: 10, p_offset: 0 }),
   ])
+  const who = new Map<string, string>()
+  const ids = [p.created_by, p.updated_by].filter((x): x is string => !!x)
+  if (ids.length) for (const r of (await supabase.from('profiles').select('id, full_name').in('id', ids)).data ?? []) who.set(r.id, r.full_name || 'Alguém da equipe')
+  const day = (iso: string) => new Date(iso).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
   const now = Date.now()
   const reservedQty = (activeRes ?? []).filter((r) => !r.expires_at || new Date(r.expires_at).getTime() > now).reduce((a, r) => a + r.quantity, 0)
   const onHand = inv?.quantity ?? 0
@@ -66,6 +72,10 @@ export default async function EditProductPage({ params, searchParams }: {
         <Link href={`/app/${slug}/produtos`} className="link small">← Produtos</Link>
         <h1>{p.name}</h1>
         <p className="muted small">Endereço do produto: <code>/{slug}/produto/{p.slug}</code></p>
+        <p className="muted small" data-testid="autoria">
+          Cadastrada {p.created_by ? `por ${who.get(p.created_by) ?? 'alguém da equipe'}` : ''} em {day(p.created_at)}
+          {p.updated_by && <> · Última alteração por <strong>{who.get(p.updated_by) ?? 'alguém da equipe'}</strong> em {day(p.updated_at)}</>}
+        </p>
         {archived && <p className="notice notice-error">Este produto está arquivado e fora do catálogo.</p>}
         {editable
           ? <ProductForm storeId={store.id} slug={slug} productId={id} initial={initial} categories={categories ?? []} archived={archived} />
@@ -109,6 +119,18 @@ export default async function EditProductPage({ params, searchParams }: {
             ))}
           </ul>
         )}
+      </section>
+
+      <section className="card stack" aria-labelledby="quem-h">
+        <h2 id="quem-h">Quem mexeu nesta peça</h2>
+        {((log ?? []) as ActivityItem[]).length === 0 ? <p className="muted small">Nenhuma atividade registrada que você possa ver.</p> : (
+          <ul className="activity">
+            {((log ?? []) as ActivityItem[]).map((a) => (
+              <li key={a.id}><span className="muted small">{timeAgo(a.created_at)}</span><span>{describeActivity({ action: a.action, entity_name: a.entity_name, details: a.details, actor_name: a.actor_name })}</span></li>
+            ))}
+          </ul>
+        )}
+        <p className="muted small">Dono e gerente veem toda a equipe; atendente vê só as próprias ações. <Link href={`/app/${slug}/atividades`} className="link">Ver todas as atividades</Link></p>
       </section>
 
       <div className="card stack">

@@ -45,10 +45,11 @@ export function LoginForms({ next }: { next: string }) {
   )
 }
 
-export function SignUpForm() {
+export function SignUpForm({ next = '/app' }: { next?: string }) {
   const [state, action] = useActionState(signUpAction, undefined)
   return (
     <form action={action} className="stack">
+      <input type="hidden" name="next" value={next} />
       <Field label="Seu nome" name="fullName" autoComplete="name" required />
       <Field label="E-mail" name="email" type="email" autoComplete="email" required />
       <Field label="Senha" name="password" type="password" autoComplete="new-password" minLength={8} required

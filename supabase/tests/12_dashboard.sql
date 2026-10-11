@@ -67,11 +67,15 @@ select test.ok('coleções = 2, categorias = 1, equipe = 2',
 select test.ok('sem reservas ativas, o painel mostra 0', (select (j ->> 'reservations')::int from d) = 0);
 select test.ok('poucas unidades = 2 (p2 e p4)', (select (j #>> '{stock,low}')::int from d) = 2);
 select test.ok('esgotados = 1 (p3; vendido e indisponível não contam)', (select (j #>> '{stock,out}')::int from d) = 1);
-select test.ok('atividade recente: no máximo 8, mais recente primeiro, com autor',
-  (select jsonb_array_length(j -> 'recent') from d) = 8
-  and (select j #>> '{recent,0,name}' from d) = 'P2' and (select j #>> '{recent,0,actor}' from d) = 'Alice');
-select test.ok('atividade de uma loja mostra só produtos dela',
-  (select count(*) from d, jsonb_array_elements(j -> 'recent') e where e ->> 'name' like 'B%') = 0);
+select public.save_product('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', null, '{"name":"Novo da Alice","slug_base":"novo-alice","price":10,"quantity":1}'::jsonb);
+create temp table d2 as select public.store_dashboard('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa') as j;
+grant select on d2 to public;
+select test.ok('atividade recente: no máximo 8, mais recente primeiro, com autor e ação',
+  (select jsonb_array_length(j -> 'recent') from d2) = 8
+  and (select j #>> '{recent,0,entity_name}' from d2) = 'Novo da Alice' and (select j #>> '{recent,0,actor}' from d2) = 'Alice'
+  and (select j #>> '{recent,0,action}' from d2) = 'product.created');
+select test.ok('atividade de uma loja mostra só a dela (nada da Loja B)',
+  (select count(*) from d2, jsonb_array_elements(j -> 'recent') e where e ->> 'entity_name' like 'B%') = 0);
 
 select test.login('00000000-0000-0000-0000-000000000004');  -- carla (B) pedindo a Loja A
 select test.ok('outra loja pedindo o painel da A recebe tudo zerado',
