@@ -6,7 +6,7 @@ export type ActivityItem = {
 }
 
 export const TYPE_LABEL: Record<string, string> = {
-  product: 'Produtos e estoque', collection: 'Coleções', category: 'Categorias', member: 'Equipe', invite: 'Convites', store: 'Configurações da loja',
+  product: 'Produtos e estoque', collection: 'Coleções', category: 'Categorias', member: 'Equipe', invite: 'Convites', story: 'Stories', store: 'Configurações da loja',
 }
 
 const STATUS: Record<string, string> = { available: 'disponível', reserved: 'reservado', sold: 'vendido/esgotado', unavailable: 'indisponível', archived: 'arquivado' }
@@ -67,6 +67,10 @@ export function describeActivity(a: Pick<ActivityItem, 'action' | 'entity_name' 
     case 'invite.created': return `${who} criou um convite para ${ROLE[String(d.role)] ?? d.role}${a.entity_name ? ` (${a.entity_name})` : ''}`
     case 'invite.revoked': return `${who} cancelou um convite${a.entity_name ? ` (${a.entity_name})` : ''}`
     case 'invite.accepted': return `${who} aceitou o convite e entrou como ${ROLE[String(d.role)] ?? d.role}`
+    case 'story.received': return `${who} recebeu um Story para revisar`
+    case 'story.converted': return `${who} transformou um Story em produto (rascunho)`
+    case 'story.discarded': return `${who} descartou um Story`
+    case 'story.pending': return `${who} devolveu um Story para revisão`
     case 'store.catalog': return `${who} ${d.enabled ? 'ligou' : 'desligou'} o catálogo público`
     case 'store.active': return `${who} ${d.active ? 'reativou' : 'desativou'} a loja`
     case 'store.updated': {

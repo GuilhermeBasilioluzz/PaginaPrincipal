@@ -48,12 +48,13 @@ begin
 
   if p_id is null then
     insert into public.products (store_id, name, slug, description, price, promo_price, category_id, color,
-                                 sizes, sku, video_url, status, is_featured, audience, styles)
+                                 sizes, sku, video_url, status, is_featured, audience, styles, source)
     values (p_store, p ->> 'name', private.next_product_slug(p_store, p ->> 'slug_base'),
             nullif(p ->> 'description', ''), (p ->> 'price')::numeric, nullif(p ->> 'promo_price', '')::numeric,
             nullif(p ->> 'category_id', '')::uuid, nullif(p ->> 'color', ''), v_sizes,
             nullif(p ->> 'sku', ''), nullif(p ->> 'video_url', ''), coalesce(v_status, 'available'),
-            coalesce((p ->> 'featured')::boolean, false), coalesce(v_audience, 'unisex'), v_styles)
+            coalesce((p ->> 'featured')::boolean, false), coalesce(v_audience, 'unisex'), v_styles,
+            case when p ->> 'source' = 'instagram' then 'instagram'::public.product_source else 'manual'::public.product_source end)
     returning id into v_id;
   else
     update public.products set

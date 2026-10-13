@@ -21,7 +21,7 @@ import { archiveProductAction, deleteProductAction, duplicateProductAction, rest
 
 export const metadata = { title: 'Editar produto' }
 
-const FLASH: Record<string, string> = { ...STOCK_FLASH, collections: 'Coleções da peça atualizadas.', forbidden: 'Você não tem permissão para fazer isso.', created: 'Produto criado! Agora adicione as fotos abaixo.', duplicated: 'Cópia criada. Ela está como indisponível: revise os dados, informe o estoque e publique.' }
+const FLASH: Record<string, string> = { ...STOCK_FLASH, collections: 'Coleções da peça atualizadas.', forbidden: 'Você não tem permissão para fazer isso.', created: 'Produto criado! Agora adicione as fotos abaixo.', story: 'Produto criado como rascunho a partir do Story, com a imagem como foto. Revise os dados e mude a situação para Disponível quando quiser publicar.', story_nophoto: 'Produto criado como rascunho, mas não foi possível copiar a imagem do Story. Envie a foto abaixo.', duplicated: 'Cópia criada. Ela está como indisponível: revise os dados, informe o estoque e publique.' }
 
 export default async function EditProductPage({ params, searchParams }: {
   params: Promise<{ store: string; id: string }>

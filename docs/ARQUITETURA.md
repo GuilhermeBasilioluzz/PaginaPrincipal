@@ -174,3 +174,11 @@ ETAPA 11: integração com o Instagram (conexão oficial, antes de implementar �
 - Feminino/Masculino incluem as peças unissex; Unissex e Infantil só as próprias. A busca de texto entende "feminino", "infantil" e os estilos.
 - **Filtro desligado é ignorado também na URL** (`applyEnabledFilters`): a seleção não é só visual. Loja só feminina: o campo "Público" some do cadastro e a peça nova nasce como Feminino.
 - Edição em lote no banco (`bulk_update_products`, até 200 peças, respeitando o RLS) já pronta; a tela de seleção em massa fica para uma etapa seguinte.
+
+## ETAPA 11 (pista A) — Stories recebidos, entrada manual
+
+- Nada depende da Meta. A equipe envia prints/imagens de Stories (reduzidos no celular, até 10 por vez) para o bucket **privado** `stories`; a tela mostra por link temporário de 1 h.
+- `story_items` (pendente → convertido | descartado). `convert_story` (SECURITY DEFINER, mesma regra de quem cadastra produto) cria o produto sempre como **rascunho "indisponível"** (origem `instagram`) e o app copia a imagem para as fotos do produto. **Publicar é uma ação humana separada.** Ninguém marca "convertido" na mão (RLS).
+- Excluir o produto não apaga o Story. Excluir Story: só dono/gerente. Histórico registra recebido/convertido/descartado sem guardar a legenda.
+- `source` já aceita `instagram`: a pista B (OAuth oficial, depois de validar a documentação da Meta) só vai inserir linhas aqui; o restante do fluxo é o mesmo.
+- Catálogo: vitrine com cards ~50% menores (3 colunas no celular, 5–6 no computador).
