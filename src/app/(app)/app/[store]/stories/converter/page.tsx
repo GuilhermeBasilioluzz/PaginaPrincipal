@@ -6,6 +6,7 @@ import { can } from '@/lib/permissions'
 import { getMembership } from '@/lib/session'
 import { createClient } from '@/lib/supabase/server'
 import { storyThumbPath } from '@/lib/stories'
+import { aiConfigured } from '@/lib/ai'
 
 export const metadata = { title: 'Transformar Stories em produto' }
 export const dynamic = 'force-dynamic'
@@ -52,7 +53,7 @@ export default async function ConvertStoriesPage({ params, searchParams }: {
         })}
       </div>
       <StoryConvertForm storeId={store.id} slug={slug} storyIds={ids} caption={caption} categories={categories ?? []} collections={collections ?? []}
-        filters={normalizeFilters(st?.catalog_filters)} hasMorePending={(pending ?? 0) > ids.length} />
+        filters={normalizeFilters(st?.catalog_filters)} hasMorePending={(pending ?? 0) > ids.length} aiEnabled={aiConfigured()} />
     </div>
   )
 }

@@ -189,3 +189,9 @@ ETAPA 11: integração com o Instagram (conexão oficial, antes de implementar �
 - Na conversão: público e estilo (conforme a seleção de filtros da loja), coleções manuais e categoria. A peça continua **rascunho**; a coleção só aparece ao público quando a peça for publicada.
 - Fila de revisão: "criar e abrir o próximo Story" e aviso de pendentes no painel (`stories_pending_count`).
 - A cópia das imagens (bucket privado → fotos do produto) é feita no servidor; se alguma falhar o produto/vínculo já existe e a tela do produto avisa para enviar a foto.
+
+## ETAPA 13 — Sugestões de IA (só sugerem)
+
+- Botão **"Sugerir com IA"** na tela de conversão de Stories. A IA (Claude, com visão) olha as imagens e **sugere** nome, descrição, cor, categoria, coleções, público e estilo. **Preço, estoque, tamanhos e situação nunca são preenchidos por ela**: o que a IA lê de preço/tamanho no Story aparece só como lembrete em texto. O resultado apenas preenche o formulário; uma pessoa revisa e cria (a peça nasce rascunho).
+- Segurança: a chave `ANTHROPIC_API_KEY` só existe no servidor (variável sem `NEXT_PUBLIC_`); sem ela o botão some e nada quebra. Imagem e legenda são tratadas como **conteúdo não confiável** (o prompt manda ignorar "instruções" dentro delas). A resposta é validada contra as listas da loja (categoria/coleção/público/estilo inventados são descartados; textos limpos de HTML e limitados). Saída em JSON por esquema, sem campo de preço/estoque.
+- Custo controlado: limite diário **por loja** (40) contado no banco (`ai_register_call`, com `ai_refund_call` quando a IA nem responde), até 4 imagens por pedido. Modelo configurável em `HYPERION_AI_MODEL` (padrão `claude-opus-5-5`; `claude-haiku-5-5` é bem mais barato). A chamada usa o recurso de modelo reserva da API caso o filtro de segurança recuse.
