@@ -182,3 +182,10 @@ ETAPA 11: integração com o Instagram (conexão oficial, antes de implementar �
 - Excluir o produto não apaga o Story. Excluir Story: só dono/gerente. Histórico registra recebido/convertido/descartado sem guardar a legenda.
 - `source` já aceita `instagram`: a pista B (OAuth oficial, depois de validar a documentação da Meta) só vai inserir linhas aqui; o restante do fluxo é o mesmo.
 - Catálogo: vitrine com cards ~50% menores (3 colunas no celular, 5–6 no computador).
+
+## ETAPA 12 — Conversão de Stories em produtos
+
+- **Vários Stories → 1 produto** (`convert_stories`, 1–8, a ordem de marcação vira a ordem das fotos; a primeira é "frente") e **anexar a produto existente** (`attach_stories`, respeita o limite de 8 fotos). Tudo ou nada no banco: se algo falha, nenhum Story é consumido. `private.claim_stories` trava as linhas e confere loja única, pendência e permissão.
+- Na conversão: público e estilo (conforme a seleção de filtros da loja), coleções manuais e categoria. A peça continua **rascunho**; a coleção só aparece ao público quando a peça for publicada.
+- Fila de revisão: "criar e abrir o próximo Story" e aviso de pendentes no painel (`stories_pending_count`).
+- A cópia das imagens (bucket privado → fotos do produto) é feita no servidor; se alguma falhar o produto/vínculo já existe e a tela do produto avisa para enviar a foto.

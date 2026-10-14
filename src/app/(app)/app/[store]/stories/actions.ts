@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import { requireUser } from '@/lib/session'
 import { dbErrorMessage } from '@/lib/errors'
 import { readProductForm } from '@/lib/products'
-import { imagePath, thumbPath } from '@/lib/images'
+import { MAX_IMAGES, imagePath, nextKind, thumbPath, type ImageKind } from '@/lib/images'
 import { MAX_STORY_CAPTION, isValidStoryPath, storyThumbPath, type StoryTab } from '@/lib/stories'
 import type { FormState } from '@/lib/types'
 import type { ActionResult } from '../produtos/image-actions'
@@ -55,49 +55,99 @@ export async function deleteStoryAction(slug: string, id: string): Promise<Actio
   return { ok: true }
 }
 
+const parseIds = (raw: string[]) => [...new Set(raw)].filter((i) => UUID.test(i)).slice(0, 8)
+
 /**
- * Transforma o Story em produto RASCUNHO (indisponível, fora do catálogo) e copia a imagem para as fotos do produto.
+ * Copia as imagens dos Stories (bucket privado) para as fotos do produto, na ordem recebida.
+ * Devolve quantas falharam: o produto/vínculo já existe e a foto pode ser enviada depois.
+ */
+async function copyStoryImages(
+  supabase: Awaited<ReturnType<typeof createClient>>, storeId: string, productId: string, paths: string[], used: string[],
+): Promise<number> {
+  let failed = 0
+  for (const path of paths) {
+    try {
+      const ext = path.endsWith('.jpg') ? 'jpg' : 'webp'
+      const dest = imagePath(storeId, productId, crypto.randomUUID(), ext)
+      const opts = { contentType: ext === 'webp' ? 'image/webp' : 'image/jpeg', cacheControl: '31536000', upsert: false }
+      const [main, thumb] = await Promise.all([
+        supabase.storage.from('stories').download(path),
+        supabase.storage.from('stories').download(storyThumbPath(path)),
+      ])
+      if (main.error || !main.data) throw new Error('main')
+      const up = await supabase.storage.from('catalog').upload(dest, main.data, opts)
+      if (up.error) throw new Error('upload')
+      const upThumb = thumb.data ? await supabase.storage.from('catalog').upload(thumbPath(dest), thumb.data, opts) : { error: null }
+      const kind: ImageKind = nextKind(used)
+      const { error } = await supabase.from('product_images').insert({ store_id: storeId, product_id: productId, path: dest, kind })
+      if (error || upThumb.error) {
+        await supabase.storage.from('catalog').remove([dest, thumbPath(dest)])
+        throw new Error('register')
+      }
+      used.push(kind)
+    } catch {
+      failed += 1
+    }
+  }
+  return failed
+}
+
+/** A Story pendente mais recente: o "próximo" da fila de revisão. */
+async function nextPending(supabase: Awaited<ReturnType<typeof createClient>>, storeId: string): Promise<string | null> {
+  const { data } = await supabase.from('story_items').select('id').eq('store_id', storeId).eq('status', 'pending')
+    .order('posted_at', { ascending: false }).limit(1)
+  return data?.[0]?.id ?? null
+}
+
+/**
+ * Transforma 1 a 8 Stories em UM produto RASCUNHO (indisponível, fora do catálogo) e copia as imagens para as fotos.
  * Quem publica é uma pessoa, na tela do produto.
  */
-export async function convertStoryAction(storeId: string, slug: string, storyId: string, _: FormState, fd: FormData): Promise<FormState> {
+export async function convertStoriesAction(storeId: string, slug: string, rawIds: string[], _: FormState, fd: FormData): Promise<FormState> {
   await requireUser()
-  if (!UUID.test(storeId) || !UUID.test(storyId)) return { error: 'Pedido inválido.' }
+  const ids = parseIds(rawIds)
+  if (!UUID.test(storeId) || ids.length === 0) return { error: 'Pedido inválido.' }
   const parsed = readProductForm(fd, { keepStatus: true })
   if (!parsed.ok) return { error: parsed.error }
 
   const supabase = await createClient()
-  const { data: story } = await supabase.from('story_items').select('path, status').eq('id', storyId).eq('store_id', storeId).maybeSingle()
-  if (!story) return { error: 'Story não encontrado.' }
-  if (story.status !== 'pending') return { error: 'Este Story já foi tratado.' }
+  const { data: rows } = await supabase.from('story_items').select('id, path, status').eq('store_id', storeId).in('id', ids)
+  if (!rows || rows.length !== ids.length) return { error: 'Story não encontrado.' }
+  if (rows.some((r) => r.status !== 'pending')) return { error: 'Algum destes Stories já foi tratado.' }
+  const paths = ids.map((id) => rows.find((r) => r.id === id)!.path)
 
-  const { data: productId, error } = await supabase.rpc('convert_story', { p_story: storyId, p: parsed.payload })
+  const { data: productId, error } = await supabase.rpc('convert_stories', { p_stories: ids, p: parsed.payload })
   if (error) return { error: dbErrorMessage(error) }
 
-  // copia a imagem (e a miniatura) do bucket privado para as fotos do produto; se falhar, o produto já existe e a foto pode ser enviada depois
-  let photoFailed = false
-  try {
-    const imageId = crypto.randomUUID()
-    const ext = story.path.endsWith('.jpg') ? 'jpg' : 'webp'
-    const dest = imagePath(storeId, String(productId), imageId, ext)
-    const type = ext === 'webp' ? 'image/webp' : 'image/jpeg'
-    const [main, thumb] = await Promise.all([
-      supabase.storage.from('stories').download(story.path),
-      supabase.storage.from('stories').download(storyThumbPath(story.path)),
-    ])
-    if (main.error || !main.data) throw new Error('main')
-    const opts = { contentType: type, cacheControl: '31536000', upsert: false }
-    const up = await supabase.storage.from('catalog').upload(dest, main.data, opts)
-    if (up.error) throw new Error('upload')
-    const upThumb = thumb.data ? await supabase.storage.from('catalog').upload(thumbPath(dest), thumb.data, opts) : { error: null }
-    const { error: regErr } = await supabase.from('product_images').insert({ store_id: storeId, product_id: productId, path: dest, kind: 'front' })
-    if (regErr || upThumb.error) {
-      await supabase.storage.from('catalog').remove([dest, thumbPath(dest)])
-      throw new Error('register')
-    }
-  } catch {
-    photoFailed = true
-  }
+  const collections = fd.getAll('collections').map(String).filter((c) => UUID.test(c))
+  if (collections.length) await supabase.rpc('set_product_collections', { p_product: productId, p_collections: collections })
+  const failed = await copyStoryImages(supabase, storeId, String(productId), paths, [])
 
   revalidatePath(`/app/${slug}`, 'layout')
-  redirect(`/app/${slug}/produtos/${productId}?ok=${photoFailed ? 'story_nophoto' : 'story'}`)
+  if (fd.get('next') === 'on') {
+    const next = await nextPending(supabase, storeId)
+    if (next) redirect(`/app/${slug}/stories/converter?ids=${next}&feito=1`)
+    redirect(`/app/${slug}/stories?feito=fila`)
+  }
+  redirect(`/app/${slug}/produtos/${productId}?ok=${failed ? 'story_nophoto' : 'story'}`)
+}
+
+/** Anexa os Stories como fotos de um produto que já existe (até 8 fotos no total). */
+export async function attachStoriesAction(storeId: string, slug: string, rawIds: string[], productId: string): Promise<ActionResult & { productId?: string }> {
+  await requireUser()
+  const ids = parseIds(rawIds)
+  if (!UUID.test(storeId) || !UUID.test(productId) || ids.length === 0) return { error: 'Pedido inválido.' }
+  const supabase = await createClient()
+  const { data: rows } = await supabase.from('story_items').select('id, path, status').eq('store_id', storeId).in('id', ids)
+  if (!rows || rows.length !== ids.length) return { error: 'Story não encontrado.' }
+  const paths = ids.map((id) => rows.find((r) => r.id === id)!.path)
+
+  const { data: existing } = await supabase.from('product_images').select('kind').eq('product_id', productId)
+  if ((existing?.length ?? 0) + ids.length > MAX_IMAGES) return { error: `Cada produto aceita até ${MAX_IMAGES} fotos.` }
+  const { error } = await supabase.rpc('attach_stories', { p_stories: ids, p_product: productId })
+  if (error) return { error: dbErrorMessage(error) }
+
+  const failed = await copyStoryImages(supabase, storeId, productId, paths, (existing ?? []).map((r) => r.kind))
+  revalidatePath(`/app/${slug}`, 'layout')
+  return failed ? { error: `${failed} imagem(ns) não puderam ser copiadas. Envie-as pela tela do produto.`, productId } : { ok: true, productId }
 }
