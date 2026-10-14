@@ -22,9 +22,17 @@ no branch `claude/inspiring-planck-k0u0jz`.
    | `NEXT_PUBLIC_SUPABASE_URL` | a Project URL do Supabase |
    | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | a chave anon / public |
 
+   Opcional (sugestões de IA nos Stories): `ANTHROPIC_API_KEY` (só no servidor; pode ter custo) e `HYPERION_AI_MODEL`.
+
    (`NEXT_PUBLIC_SITE_URL` é opcional: sem ela o site usa o endereço que a Vercel informa sozinha.)
 4. **Deploy**. Ao terminar, a Vercel mostra o endereço, algo como `https://paginaprincipal-xxxx.vercel.app`. **Esse é o link de teste.**
 5. Volte ao Supabase → *Authentication → URL Configuration* e coloque esse endereço em **Site URL**.
+
+## 2.1 Conferir a configuração (1 minuto)
+Abra `https://SEU-LINK/api/saude`. Ela mostra só "sim/não", sem chaves:
+- `supabase_configurado: true` → as duas variáveis da Vercel estão certas.
+- `banco: "ok"` → o site fala com o Supabase e as migrations foram aplicadas. `"sem_migrations"` → rode o `all_migrations.sql`. `"sem_conexao"` → confira a URL/chave e faça Redeploy.
+- `ia_ligada: true` → a `ANTHROPIC_API_KEY` está cadastrada (opcional; só para "Sugerir com IA").
 
 ## 3. Ver funcionando (5 minutos)
 1. Abra o link → **Criar conta** (use um e-mail seu) → você entra no sistema.
