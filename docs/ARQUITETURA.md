@@ -202,3 +202,9 @@ ETAPA 11: integração com o Instagram (conexão oficial, antes de implementar �
 - QR gerado no servidor (`qrcode`), sempre preto sobre branco, correção média. Rota pública `/{loja}/qr?para=loja|colecao:slug|produto:slug&formato=svg|png` (`baixar=1` força o download). O QR só codifica o endereço público; a rota devolve 404 para loja desligada, coleção/peça inexistente ou alvo fora do padrão (entrada validada por `parseShareTarget`). Decodificação conferida com um leitor de QR nos testes manuais.
 - O endereço base vem de `NEXT_PUBLIC_SITE_URL` ou do domínio da Vercel; se usar domínio próprio depois, defina `NEXT_PUBLIC_SITE_URL` para os QRs saírem com ele.
 - Medição de cliques/origem (bio, QR, Story) fica para a ETAPA 15 (análises), para não contar pela metade.
+
+## ETAPA 15 — Análises (anônimas)
+
+- **Só contadores por dia** (`analytics_daily`): loja, dia, tipo (visita à loja/coleção/peça, toque no WhatsApp, compartilhamento), peça/coleção, origem e quantas vezes. **Sem IP, cookie, identificador de visitante ou dado pessoal.** Escrita só pela função `track_event` (anon, valida loja com catálogo ligado e peça/coleção que realmente estão no catálogo); leitura só por dono e gerente (`store_analytics`: totais, período anterior, série diária, origens, 10 peças, coleções). O "Avise-me" continua em `product_interest_clicks`.
+- **Navegador:** conta uma vez por visita (sessionStorage), respeita "não rastrear" e nunca atrapalha a página. A origem vem de `?o=bio|story|qr|whatsapp` nos links da tela Compartilhar e fica na sessão. O QR já sai com `?o=qr`.
+- **Limites conhecidos (declarados):** sem identificar o visitante, não dá para barrar contagem inflada de propósito, e a equipe abrindo o próprio catálogo também conta. Proteção contra abuso (limite por origem/CAPTCHA) entra na ETAPA 20.

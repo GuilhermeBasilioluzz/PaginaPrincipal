@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ProductCard } from './ProductCard'
+import { Track, TrackedLink } from './Track'
 import {
   CATALOG_PAGE_SIZE, SORTS, activeFilters, applyEnabledFilters, catalogHref, parseCatalogQuery, sortSizes, type CatalogQuery,
 } from '@/lib/catalog'
@@ -42,6 +43,7 @@ export async function CatalogView({ slug, collectionSlug, searchParams }: { slug
 
   return (
     <div className="shop">
+      <Track store={store.slug} kind={collection ? 'collection_view' : 'store_view'} refSlug={collection?.slug ?? ''} />
       <header className="shop-head">
         {store.banner_path && (
           // eslint-disable-next-line @next/next/no-img-element
@@ -67,7 +69,7 @@ export async function CatalogView({ slug, collectionSlug, searchParams }: { slug
           </div>
         </div>
         <div className="shop-cta">
-          {wa && <a href={wa} className="btn btn-primary" target="_blank" rel="noopener noreferrer">Falar no WhatsApp</a>}
+          {wa && <TrackedLink store={store.slug} kind="whatsapp_click" href={wa} className="btn btn-primary" target="_blank" rel="noopener noreferrer">Falar no WhatsApp</TrackedLink>}
           {store.instagram_handle && <a href={instagramUrl(store.instagram_handle)} className="btn btn-ghost" target="_blank" rel="noopener noreferrer">@{store.instagram_handle}</a>}
         </div>
       </header>

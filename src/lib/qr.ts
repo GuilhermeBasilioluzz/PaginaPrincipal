@@ -24,7 +24,9 @@ export function sharePath(storeSlug: string, t: ShareTarget): string {
   return `/${storeSlug}/${t.kind}/${t.slug}`
 }
 
-export const shareUrl = (site: string, storeSlug: string, t: ShareTarget) => `${site.replace(/\/+$/, '')}${sharePath(storeSlug, t)}`
+/** Endereço público; `source` (qr, bio, story, whatsapp) vira ?o= para as análises saberem de onde a visita veio. */
+export const shareUrl = (site: string, storeSlug: string, t: ShareTarget, source?: 'qr' | 'bio' | 'story' | 'whatsapp') =>
+  `${site.replace(/\/+$/, '')}${sharePath(storeSlug, t)}${source ? `?o=${source}` : ''}`
 
 // QR sempre preto sobre branco (leitores de câmera falham com cores invertidas), com margem de silêncio e correção média.
 const BASE = { margin: 2, errorCorrectionLevel: 'M' as const, color: { dark: '#000000', light: '#ffffff' } }

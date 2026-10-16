@@ -26,7 +26,7 @@ export default async function SharePage({ params }: { params: Promise<{ store: s
   const card = (title: string, t: ShareTarget, text: string) => {
     const param = encodeURIComponent(shareTargetParam(t))
     return (
-      <ShareCard key={param} title={title} url={shareUrl(site, store.slug, t)} text={text}
+      <ShareCard key={param} title={title} url={shareUrl(site, store.slug, t)} bioUrl={shareUrl(site, store.slug, t, 'bio')} storyUrl={shareUrl(site, store.slug, t, 'story')} text={text}
         qrSrc={`/${store.slug}/qr?para=${param}`} posterHref={`/app/${slug}/compartilhar/cartaz?para=${param}`} />
     )
   }
@@ -38,8 +38,9 @@ export default async function SharePage({ params }: { params: Promise<{ store: s
         <p className="muted small">Links e QR Codes para a bio do Instagram, os Stories, o balcão e o WhatsApp. A cliente abre direto no celular, sem baixar nada.</p>
         {!live && <p className="notice notice-error" role="alert">O catálogo está desligado: quem abrir o link vê uma página vazia. Ligue em <Link className="link" href={`/app/${slug}/configuracoes`}>Configurações</Link>.</p>}
         <ul className="small muted">
-          <li><strong>Bio do Instagram:</strong> cole o link da loja no campo “Site”.</li>
-          <li><strong>Story:</strong> use o adesivo de Link com o endereço da coleção ou da peça.</li>
+          <li><strong>Bio do Instagram:</strong> use “Link para a bio” no campo “Site”.</li>
+          <li><strong>Story:</strong> use “Link para Story” no adesivo de Link.</li>
+          <li>Cada link marca a origem, e a aba <Link className="link" href={`/app/${slug}/analises`}>Análises</Link> mostra de onde vêm as visitas.</li>
           <li><strong>Balcão:</strong> imprima o cartaz com o QR Code.</li>
         </ul>
       </div>

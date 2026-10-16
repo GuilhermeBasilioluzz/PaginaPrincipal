@@ -5,6 +5,7 @@ import { ProductCard } from '@/components/catalog/ProductCard'
 import { ProductActions } from '@/components/catalog/ProductActions'
 import { ProductGallery } from '@/components/catalog/ProductGallery'
 import { ShareBar } from '@/components/catalog/ShareBar'
+import { Track } from '@/components/catalog/Track'
 import { STOCK_BADGE, discountPercent } from '@/lib/catalog'
 import { publicUrl, thumbPath } from '@/lib/images'
 import { productUrl } from '@/lib/interest'
@@ -84,6 +85,7 @@ export default async function ProductPage({ params }: Props) {
 
           {p.color && <p className="muted small" style={{ margin: 0 }}>Cor: <strong>{p.color}</strong></p>}
 
+          <Track store={store.slug} kind="product_view" refSlug={p.slug} />
           <ProductActions storeSlug={store.slug} productSlug={p.slug} name={p.name} price={price} label={p.stock_label} sizes={p.sizes}
             whatsapp={store.whatsapp} instagram={store.instagram_handle} interestOpen={page.interest_open} siteUrl={site} />
 
@@ -92,7 +94,7 @@ export default async function ProductPage({ params }: Props) {
             <p className="small muted" style={{ margin: 0 }}>Em: {collections.map((c, i) => <span key={c.slug}>{i > 0 && ', '}<Link href={`/${store.slug}/colecao/${c.slug}`} className="link">{c.name}</Link></span>)}</p>
           )}
 
-          <ShareBar url={link} title={`${p.name} — ${store.name}`} text={shareText(store.name, p.name, price)} />
+          <ShareBar storeSlug={store.slug} productSlug={p.slug} url={link} title={`${p.name} — ${store.name}`} text={shareText(store.name, p.name, price)} />
         </div>
       </div>
 

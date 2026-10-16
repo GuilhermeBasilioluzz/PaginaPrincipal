@@ -339,3 +339,12 @@ a.tile { text-decoration: none; color: inherit; }
   .poster-sheet { border-radius: 0; max-width: none; padding: 3cm 2cm; min-height: 90vh; }
   .poster-qr { width: 12cm; }
 }
+
+/* análises (ETAPA 15) */
+.bars { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.6rem; }
+.bars li { display: grid; grid-template-columns: minmax(7rem, 11rem) minmax(0, 1fr) auto; gap: 0.75rem; align-items: center; }
+.bar-track { height: 10px; border-radius: 99px; background: var(--surface-2, #1c1c1f); overflow: hidden; }
+.bar-track i { display: block; height: 100%; background: var(--copper, #c8975a); border-radius: 99px; }
+.delta-up { color: #6cc596; } .delta-down { color: #e08a79; }
+@media (max-width: 520px) { .bars li { grid-template-columns: minmax(0, 1fr) auto; } .bar-track { grid-column: 1 / -1; order: 3; } }
+.perm-table td:first-child, .perm-table th:first-child { text-align: left; }

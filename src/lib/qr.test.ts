@@ -20,6 +20,7 @@ describe('links', () => {
     expect(sharePath('aurora', { kind: 'loja' })).toBe('/aurora')
     expect(sharePath('aurora', { kind: 'colecao', slug: 'novidades' })).toBe('/aurora/colecao/novidades')
     expect(shareUrl('https://x.vercel.app/', 'aurora', { kind: 'produto', slug: 'saia' })).toBe('https://x.vercel.app/aurora/produto/saia')
+    expect(shareUrl('https://x.vercel.app', 'aurora', { kind: 'loja' }, 'bio')).toBe('https://x.vercel.app/aurora?o=bio')
   })
   it('o parâmetro volta a ser lido igual', () => {
     for (const t of [{ kind: 'loja' as const }, { kind: 'colecao' as const, slug: 'a1' }, { kind: 'produto' as const, slug: 'b2' }]) {

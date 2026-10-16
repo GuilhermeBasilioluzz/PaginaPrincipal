@@ -4,10 +4,10 @@ import { useState } from 'react'
 import { copyText, shareWhatsappUrl } from '@/lib/share'
 
 /** Cartão de compartilhamento: QR, link, copiar, WhatsApp, baixar PNG e cartaz para imprimir. */
-export function ShareCard({ title, url, qrSrc, posterHref, text }: { title: string; url: string; qrSrc: string; posterHref: string; text: string }) {
+export function ShareCard({ title, url, bioUrl, storyUrl, qrSrc, posterHref, text }: { title: string; url: string; bioUrl: string; storyUrl: string; qrSrc: string; posterHref: string; text: string }) {
   const [status, setStatus] = useState<string | null>(null)
-  const copy = async () => {
-    setStatus((await copyText(url)) ? 'Link copiado!' : 'Não foi possível copiar. Selecione o link acima.')
+  const copy = async (value: string, what: string) => {
+    setStatus((await copyText(value)) ? `${what} copiado!` : 'Não foi possível copiar. Selecione o link acima.')
     setTimeout(() => setStatus(null), 2500)
   }
   return (
@@ -19,8 +19,12 @@ export function ShareCard({ title, url, qrSrc, posterHref, text }: { title: stri
         <div className="stack">
           <p><code>{url}</code></p>
           <div className="row">
-            <button type="button" className="btn btn-primary" onClick={copy}>Copiar link</button>
-            <a className="btn btn-ghost" href={shareWhatsappUrl(text, url)} target="_blank" rel="noopener noreferrer">Enviar no WhatsApp</a>
+            <button type="button" className="btn btn-primary" onClick={() => copy(url, 'Link')}>Copiar link</button>
+            <a className="btn btn-ghost" href={shareWhatsappUrl(text, `${url}?o=whatsapp`)} target="_blank" rel="noopener noreferrer">Enviar no WhatsApp</a>
+          </div>
+          <div className="row">
+            <button type="button" className="btn btn-ghost" onClick={() => copy(bioUrl, 'Link da bio')}>Link para a bio</button>
+            <button type="button" className="btn btn-ghost" onClick={() => copy(storyUrl, 'Link do Story')}>Link para Story</button>
           </div>
           <div className="row">
             <a className="btn btn-ghost" href={`${qrSrc}&formato=png&baixar=1`}>Baixar QR (PNG)</a>

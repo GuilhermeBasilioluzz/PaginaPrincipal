@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { customerMessage, productUrl, questionMessage } from '@/lib/interest'
 import { sortSizes, type StockLabel } from '@/lib/catalog'
+import { TrackedLink } from './Track'
 import { instagramUrl, whatsappUrl } from '@/lib/storeSettings'
 
 /** Escolha de tamanho + botões de contato. A mensagem do WhatsApp já leva a peça, o link e o tamanho escolhido. */
@@ -37,9 +38,9 @@ export function ProductActions({ storeSlug, productSlug, name, price, label, siz
 
       {buyable && (whatsapp ? (
         <div className="stack" style={{ gap: '0.5rem' }}>
-          <a className="btn btn-primary" target="_blank" rel="noopener noreferrer"
-            href={whatsappUrl(whatsapp, customerMessage(label, name, link, price, size))}>Tenho interesse — falar no WhatsApp</a>
-          <a className="link small" target="_blank" rel="noopener noreferrer" href={whatsappUrl(whatsapp, questionMessage(name, link))}>Tirar uma dúvida sobre esta peça</a>
+          <TrackedLink store={storeSlug} kind="whatsapp_click" refSlug={productSlug} className="btn btn-primary" target="_blank" rel="noopener noreferrer"
+            href={whatsappUrl(whatsapp, customerMessage(label, name, link, price, size))}>Tenho interesse — falar no WhatsApp</TrackedLink>
+          <TrackedLink store={storeSlug} kind="whatsapp_click" refSlug={productSlug} className="link small" target="_blank" rel="noopener noreferrer" href={whatsappUrl(whatsapp, questionMessage(name, link))}>Tirar uma dúvida sobre esta peça</TrackedLink>
         </div>
       ) : noWhatsapp)}
 

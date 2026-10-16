@@ -20,7 +20,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   if (target.kind === 'colecao' && !catalog.collections.some((c) => c.slug === target.slug)) return notFound()
   if (target.kind === 'produto' && !(await getCatalogProduct(loja, target.slug))) return notFound()
 
-  const url = shareUrl(siteUrl(), catalog.store.slug, target)
+  const url = shareUrl(siteUrl(), catalog.store.slug, target, 'qr')
   const png = sp.get('formato') === 'png'
   const body = png ? new Uint8Array(await qrPng(url)) : await qrSvg(url)
   const name = `qr-${catalog.store.slug}${target.kind === 'loja' ? '' : `-${target.slug}`}.${png ? 'png' : 'svg'}`
